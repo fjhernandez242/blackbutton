@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="">
+
+    <head>
+        <meta charset="UTF-8">
+        <link rel="icon" href="./src/assets/img/icon/logo1_sinFondo.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BlackButton</title>
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <!-- Favicon -->
+    </head>
+
+    <body>
+        <div class="spinner-grow text-dark" style="width: 5rem; height: 5rem;" role="status"></div>
+        <div id="app"></div>
+        <!-- jQuery v3.7.1 -->
+        <script src="./src/assets/js/jQuery.min.js"></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+    <script>
+        $(document).ready(function () {
+            $('.spinner-grow').hide();
+        });
+    </script>
+
+</html>
+
+<style scoped>
+    body {
+        /* Usa la familia de fuentes con el nombre que te dio Google Fonts.
+       Asegúrate de incluir una fuente de respaldo (serif, sans-serif, etc.) */
+        font-family: 'Roboto', sans-serif;
+        background-image: url('/src/assets/img/fondoPantalla6.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        height: 100%;
+    }
+
+    /* Para un elemento específico */
+    h1 {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        /* Puedes usar los pesos que importaste */
+    }
+
+    .spinner-grow {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+    }
+</style>
