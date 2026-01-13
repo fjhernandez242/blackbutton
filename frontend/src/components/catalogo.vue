@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted, watch, computed } from 'vue';
     import { API_BASE_URL } from '@/config/api-urls';
     // Importa modal
     import modalProducto from './modalProducto.vue';
@@ -74,8 +74,8 @@
     const imagenDesenfocada = ref(false);
     // Variable para almacenar productos
     const catalogo = ref([]);
-    const listarProductos = async () => {
-        getProductos().then(
+    const listarProductos = async (type) => {
+        getProductos(type).then(
             (data) => {
                 catalogo.value = data.productos;
             }
@@ -88,8 +88,17 @@
     const rutaImagen = (urlRelativa) => {
         return `${API_BASE_URL}${urlRelativa}`;
     }
-    onMounted(listarProductos);
+    // Llama los archivos al iniciar la página
+    // Escucha el cambio del tipo de producto
+    onMounted(() => {
+        listarProductos(0);
+    });
+    const currentTipo = computed(() => cartStore.tipoEntrega);
 
+    watch(() => cartStore.tipoEntrega, (newType) => {
+        listarProductos(newType);
+    })
+    //
     const selecProducto = (id) => {
         idProducto.value = id;
         mostrarModal.value = true;

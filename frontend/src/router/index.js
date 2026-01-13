@@ -1,15 +1,19 @@
-import { createRouter, createMemoryHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-    history: createMemoryHistory(import.meta.env.BASE_URL),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: '/',
-            component: () => import('../components/catalogo.vue')
+            name: 'catalogo',
+            component: () => import('../components/catalogo.vue'),
+            meta: { hideHeader: false }
         },
         {
             path: '/panel',
-            component: () => import('../components/panel.vue')
+            name: 'panel',
+            component: () => import('../components/panel.vue'),
+            meta: { hideHeader: true }
         },
     ],
 })

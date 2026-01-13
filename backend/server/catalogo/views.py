@@ -13,12 +13,21 @@ from django.utils import timezone
 
 from .forms import CatalogoForm
 
-@api_view(['GET'])
+@api_view(['POST'])
 # @authentication_classes([TokenAuthentication])
 # @permission_classes([IsAuthenticated])
 def productos(request):
-    # se obienen todos los productos
-    get_productos = catalogo_model.objects.all()
+    # Optiene el tipo de entrega
+    # 0 - debe regresar todos
+    # 1 - Regresa los de entrega inmediata
+    # 2 - Regresa lo de sobre pedido
+    data = request.data
+    if data['tipo'] == 0:
+        # se obienen todos los productos
+        get_productos = catalogo_model.objects.all()
+    else:
+        # Se obtienen solo los productos del tipo indicado
+        get_productos = catalogo_model.objects.filter(tipo_entrega=data['tipo'])
     # Se envian a serializar el objeto
     serializer = CatalogoSerializer(instance=get_productos, many=True)
     return Response({ "productos": serializer.data }, status=status.HTTP_200_OK)

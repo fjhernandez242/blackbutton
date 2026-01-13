@@ -1,9 +1,14 @@
 import { URLS } from "@/config/api-urls";
 
 // Listar productos
-export function getProductos() {
+export function getProductos(tipo_entrega = 0) {
     return fetch(URLS.LISTAR_PRODUCTOS, {
+        method: 'POST',
+        body: JSON.stringify({
+            "tipo": tipo_entrega
+        }),
         headers: {
+            "Content-Type": "application/json",
             "Authorization": "Token 6970ab58d53f6bd8c94183a3360512762ac52a06"
         }
     }).then(

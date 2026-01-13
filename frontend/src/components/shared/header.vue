@@ -12,15 +12,18 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#">Todos</a>
+                            <a class="nav-link" aria-current="page" @click="cambiarTipo(0)"
+                                :class="[cartStore.tipoEntrega == 0 ? 'hoverLink' : '']">Todos</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#">Entrega inmediata</a>
+                        <li class="nav-item ps-1">
+                            <a class="nav-link" aria-current="page" @click="cambiarTipo(1)"
+                                :class="[cartStore.tipoEntrega == 1 ? 'hoverLink' : '']">Entrega inmediata</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#">Sobre pedido</a>
+                        <li class="nav-item ps-1">
+                            <a class="nav-link" aria-current="page" @click="cambiarTipo(2)"
+                                :class="[cartStore.tipoEntrega == 2 ? 'hoverLink' : '']">Sobre pedido</a>
                         </li>
-                        <li class="nav-item pe-4">
+                        <li class="nav-item pe-4 ps-1">
                             <button type="button" class="nav-link btn position-relative" data-bs-toggle="offcanvas"
                                 data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
                                 <i class="bi bi-cart2"></i>
@@ -57,6 +60,11 @@
     const loadedProducts = () => {
         loader.value = cartStore.loadedProducts;
     }
+    // Cambio de tipo de producto
+    const cambiarTipo = (nuevoTipo) => {
+        cartStore.cambiarTipoEntrega(nuevoTipo);
+    }
+
 </script>
 
 <style scoped>
@@ -77,6 +85,10 @@
         transition: all 0.9s;
     }
 
+    .nav-link {
+        cursor: pointer;
+    }
+
     .navbar #titleNavbar {
         font-weight: bold;
         color: #6D214F;
@@ -92,7 +104,12 @@
         border-radius: 10px;
         box-shadow: 0 7px 5px rgb(181, 52, 113);
         transition: all 0.9s;
+    }
 
+    .hoverLink {
+        border-radius: 10px;
+        box-shadow: 0 7px 5px rgb(181, 52, 113);
+        transition: all 0.9s;
     }
 
     #bntShearch {

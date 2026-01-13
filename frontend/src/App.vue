@@ -1,23 +1,30 @@
 <template>
-    <header_vue />
-    <section id="content">
-        <catalogo_vue />
+    <header_vue v-if="!$route.meta.hideHeader" />
+
+    <section :id="!$route.meta.hideHeader ? 'content' : 'panel-full'">
+        <router-view />
     </section>
 </template>
 
 <script setup>
-    // Importa Header
     import header_vue from './components/shared/header.vue';
-    // Importar pantalla de catalogo
-    import catalogo_vue from './components/catalogo.vue';
+    import { useRoute } from 'vue-router';
 
+    const route = useRoute(); // Esto nos permite acceder a la info de la URL actual
 </script>
 
 
 <style scoped>
     #content {
-        padding-top: 70px;
-        padding-left: 160px;
-        padding-right: 160px;
+    padding-top: 70px;
+    padding-left: 160px;
+    padding-right: 160px;
+    }
+
+    #panel-full {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        min-height: 100vh;
     }
 </style>
