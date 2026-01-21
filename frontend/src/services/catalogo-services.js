@@ -1,12 +1,10 @@
 import { URLS } from "@/config/api-urls";
 
 // Listar productos
-export function getProductos(tipo_entrega = 0) {
+export function getProductos(params) {
     return fetch(URLS.LISTAR_PRODUCTOS, {
         method: 'POST',
-        body: JSON.stringify({
-            "tipo": tipo_entrega
-        }),
+        body: JSON.stringify(params),
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Token 6970ab58d53f6bd8c94183a3360512762ac52a06"
@@ -27,6 +25,9 @@ export function cargarProducto(params) {
     formData.append("producto", params.producto);
     formData.append("precio", params.precio);
     formData.append("dimensiones", params.dimensiones);
+    formData.append("disponibilidad", params.disponibilidad);
+    formData.append("inventario", params.inventario);
+    formData.append("comentario", params.comentario);
     formData.append("imagen", params.imagen);
 
     return fetch(URLS.AGREGAR_PRODUCTO, {

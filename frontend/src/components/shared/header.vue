@@ -13,15 +13,15 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" @click="cambiarTipo(0)"
-                                :class="[cartStore.tipoEntrega == 0 ? 'hoverLink' : '']">Todos</a>
+                                :class="[cartStore.tipoEntrega['cambioTipo'] == 0 ? 'hoverLink' : '']">Todos</a>
                         </li>
                         <li class="nav-item ps-1">
                             <a class="nav-link" aria-current="page" @click="cambiarTipo(1)"
-                                :class="[cartStore.tipoEntrega == 1 ? 'hoverLink' : '']">Entrega inmediata</a>
+                                :class="[cartStore.tipoEntrega['cambioTipo'] == 1 ? 'hoverLink' : '']">Entrega inmediata</a>
                         </li>
                         <li class="nav-item ps-1">
                             <a class="nav-link" aria-current="page" @click="cambiarTipo(2)"
-                                :class="[cartStore.tipoEntrega == 2 ? 'hoverLink' : '']">Sobre pedido</a>
+                                :class="[cartStore.tipoEntrega['cambioTipo'] == 2 ? 'hoverLink' : '']">Sobre pedido</a>
                         </li>
                         <li class="nav-item pe-4 ps-1">
                             <button type="button" class="nav-link btn position-relative" data-bs-toggle="offcanvas"
@@ -36,8 +36,11 @@
                         </li>
                     </ul>
                     <form class="d-flex" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar">
-                        <button class="btn" id="bntShearch" type="submit">Buscar</button>
+                        <div class="col-12">
+                            <input class="form-control me-2" type="search" placeholder=""
+                                name="search" v-model="v_search" id="searchAnimation">
+                            <label>Buscar</label>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -49,10 +52,11 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { ref, watch } from 'vue';
     import { useCartStore } from '@/store/cartStore.js';
     import alerts_success from './alerts_success.vue';
     import offcanvas from './offcanvas.vue';
+
     const loader = ref([]);
     // Instancia del store
     const cartStore = useCartStore();
@@ -62,8 +66,25 @@
     }
     // Cambio de tipo de producto
     const cambiarTipo = (nuevoTipo) => {
-        cartStore.cambiarTipoEntrega(nuevoTipo);
+        const params = ref({ 'cambioTipo': nuevoTipo });
+        cartStore.cambiarTipoEntrega(params);
     }
+    // Sección: Busqueda
+    const v_search = ref('');
+    watch(v_search, (nuevoValor, viejoValor) => {
+        if (cartStore.tipoEntrega.search == undefined || cartStore.tipoEntrega.search == '') {
+            cartStore.cambiarTipoEntrega(ref({'cambioTipo': 0}));
+        }
+        cartStore.cambiarTipoEntrega(ref({'search': nuevoValor}));
+    });
+
+    // Escucha cuando cambia el valor para tipo de entrega, limpia campo search
+    watch(() => cartStore.tipoEntrega, (nuevoValor, viejoValor) => {
+        console.log(nuevoValor.cambioTipo);
+        if (nuevoValor.cambioTipo != undefined) {
+            v_search.value = '';
+        }
+    })
 
 </script>
 
@@ -112,11 +133,44 @@
         transition: all 0.9s;
     }
 
-    #bntShearch {
-        background-color: #B53471;
+    #searchAnimation {
+        border: 0;
+        padding: 4px 0;
+        border-bottom: 1px solid #ccc;
+        background-color: transparent;
     }
 
-    #bntShearch:hover {
-        background-color: #c56cf0;
+    #searchAnimation ~ label {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        top: 9px;
+        color: #aaa;
+        transition: 0.3s;
+        z-index: -1;
+        letter-spacing: 0.5px;
+    }
+
+    #searchAnimation:focus ~ label, .has-content#searchAnimation ~ label {
+        top: -16px;
+        font-size: 12px;
+        color: #6D214F;
+        transition: 0.3s;
+    }
+
+    .col-12 {
+        float: left;
+        position: relative;
+    }
+
+    input[type="text"] {
+        color: #333;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+    }
+
+    :focus {
+        outline: none;
     }
 </style>

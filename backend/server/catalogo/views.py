@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from .serializers import CatalogoSerializer
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -12,22 +11,31 @@ from .models import catalogo_model
 from django.utils import timezone
 
 from .forms import CatalogoForm
+from django.db.models import Q
 
 @api_view(['POST'])
 # @authentication_classes([TokenAuthentication])
 # @permission_classes([IsAuthenticated])
 def productos(request):
+    # if isinstance(request, list):
     # Optiene el tipo de entrega
     # 0 - debe regresar todos
     # 1 - Regresa los de entrega inmediata
     # 2 - Regresa lo de sobre pedido
     data = request.data
-    if data['tipo'] == 0:
-        # se obienen todos los productos
-        get_productos = catalogo_model.objects.all()
-    else:
-        # Se obtienen solo los productos del tipo indicado
-        get_productos = catalogo_model.objects.filter(tipo_entrega=data['tipo'])
+    if 'search' in data:
+        search = data['search']
+        get_productos = catalogo_model.objects.filter(
+            Q(producto__icontains=search) |
+            Q(precio__icontains=search)
+        ).distinct()
+    else :
+        if data['cambioTipo'] == 0:
+            # se obienen todos los productos
+            get_productos = catalogo_model.objects.all()
+        else:
+            # Se obtienen solo los productos del tipo indicado
+            get_productos = catalogo_model.objects.filter(disponibilidad=data['cambioTipo'])
     # Se envian a serializar el objeto
     serializer = CatalogoSerializer(instance=get_productos, many=True)
     return Response({ "productos": serializer.data }, status=status.HTTP_200_OK)
@@ -49,7 +57,10 @@ def agregar_producto(request):
                     precio = form.cleaned_data['precio'],
                     dimensiones = form.cleaned_data['dimensiones'],
                     imagen = form.cleaned_data['imagen'],
-                    fecha_registro = timezone.now()
+                    fecha_registro = timezone.now(),
+                    disponibilidad = form.cleaned_data['disponibilidad'],
+                    inventario = form.cleaned_data['inventario'],
+                    comentario = form.cleaned_data['comentario']
                 )
         except:
             return Response({ "error": "Algo salio mal" })
@@ -77,6 +88,9 @@ def editar_producto(request):
     producto.precio = form['precio']
     producto.dimensiones = form['dimensiones']
     producto.imagen = form['imagen']
+    producto.disponibilidad = form['disponibilidad']
+    producto.inventario = form['inventario']
+    producto.comentario = form['comentario']
     producto.save()
 
     return Response({ "success": "Producto editado" }, status=status.HTTP_200_OK)

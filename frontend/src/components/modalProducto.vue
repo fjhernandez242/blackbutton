@@ -3,15 +3,15 @@
         <div v-if="props.visible" class="modal" id="trabajoModal" tabindex="-1" aria-labelledby="trabajoModalLabel"
             style="display: block;" aria-modal="true" role="dialog">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
+                <div class="modal-content h-50">
                     <div class="modal-body">
                         <div class="d-flex justify-content-end pb-2">
                             <button type="button" class="btn-close" @click="modalClose()" aria-label="Close"></button>
                         </div>
-                        <div class="card h-100" id="cardinfo">
-                            <div class="card-body">
+                        <div class="card h-100 shadow-sm" id="cardinfo">
+                            <div class="card-body d-flex flex-column" style="overflow-y: auto;">
                                 <div class="row">
-                                    <div class="col-xl-6" id="imgContent">
+                                    <div class="col-xl-6 card-img-container" id="imgContent">
                                         <img :src="rutaImagen(v_imagen)" alt="" id="imgEdit">
                                     </div>
                                     <div class="col-xl-6">
@@ -31,8 +31,27 @@
                                                     </th>
                                                     <th>{{ v_dimensiones }} cm</th>
                                                 </tr>
+                                                <tr>
+                                                    <th>
+                                                        <i class="bi bi-cart-fill pe-1"></i>
+                                                        <label for="dimensiones">Disponibilidad: </label>
+                                                    </th>
+                                                    <th>{{ v_disponible }}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>
+                                                        <i class="bi bi-box-seam-fill pe-1"></i>
+                                                        <label for="dimensiones">Stock: </label>
+                                                    </th>
+                                                    <th>{{ v_inventario }}</th>
+                                                </tr>
                                             </tbody>
                                         </table>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <p>{{ v_comentario }}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="d-flex justify-content-end">
                                        <button class="btn" @click="addProduct()" id="btnCerrar">
@@ -52,7 +71,6 @@
 
 <script setup>
     import { ref, watch } from 'vue';
-    import { productoById } from '@/services/catalogo-services';
     import { API_BASE_URL } from '@/config/api-urls';
     // props
     import { useCartStore } from '@/store/cartStore';
@@ -62,6 +80,9 @@
     const v_producto = defineModel('producto');
     const v_precio = defineModel('precio');
     const v_dimensiones = defineModel('dimensiones');
+    const v_disponible = defineModel('disponible');
+    const v_inventario = defineModel('inventario');
+    const v_comentario = defineModel('comentario');
 
 
     // Define emits
@@ -70,35 +91,33 @@
     const idLocal = ref(null);
     // Define Props
     const props = defineProps({
-        productoId: {
-            type: [Number, String, null],
+        producto: {
+            type: Array,
             default: null
         }, visible: {
             type: Boolean,
             default: false
         }
     });
-    function obtenerProducto(idprod) {
-        productoById(idprod).then(
-            (response) => {
-                const data = response.producto;
-
-                id_prod.value = data['id'];
-                v_imagen.value = data['imagen'];
-                v_producto.value = data['producto'];
-                v_precio.value = data['precio'];
-                v_dimensiones.value = data['dimensiones'];
-            }
-        );
-    }
     // 4. Observador (watcher) para reaccionar cuando el ID o la visibilidad cambian
     watch(
-        () => props.productoId,
-        (idprod) => {
-            if (idprod) {
+        () => props.producto,
+        (prod) => {
+            if (prod) {
+                console.log(prod);
+
                 // Lógica para cargar los datos del trabajo con este ID
-                idLocal.value = idprod;
-                obtenerProducto(idprod);
+                idLocal.value = prod.id;
+                // Se obtiene los datos
+                id_prod.value = prod.id;
+                v_imagen.value = prod.imagen;
+                v_producto.value = prod.producto;
+                v_precio.value = prod.precio;
+                v_dimensiones.value = prod.dimensiones;
+                v_disponible.value = prod.disponibilidad == 1 ? 'Inmediata' : 'Sobre pedido';
+                v_inventario.value = prod.inventario;
+                v_comentario.value = prod.comentario;
+
             } else {
                 // Modo agregar: limpiar o preparar el formulario
                 idLocal.value = null;
@@ -139,27 +158,14 @@
         v_producto.value = '';
         v_precio.value = '';
         v_dimensiones.value = '';
+        v_disponible.value = 1;
+        v_inventario.value = 0;
+        v_comentario.value = '';
 
     }
 </script>
 
 <style scoped>
-    .modal-content {
-        background-color: rgb(238, 247, 255);
-    }
-
-    .modal {
-        background: rgba(0, 0, 0, 0.5);
-    }
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1040;
-        width: 100vw;
-        height: 100vh;
-    }
-
     /* 1. Estado inicial del elemento al entrar (antes de que 'visible' sea true)
         o estado final al salir (cuando 'visible' pasa a ser false) */
     .fade-slide-enter-from,
@@ -189,9 +195,22 @@
         transform: translateY(-50px);
     }
 
+    .modal {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        width: 100vw;
+        height: 100vh;
+    }
+
     #cardinfo {
         width: 100%;
-        height: 300px;
+        height: 200px;
         overflow: hidden;
         background-color: rgb(238, 247, 255);
         border-radius: 10px;

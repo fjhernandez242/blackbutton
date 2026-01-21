@@ -1,52 +1,59 @@
 <template>
-    <div class="row g-1" id="catalogo">
-        <div v-for="producto in catalogo" :key="producto.id" class="col-12 col-sm-6 col-lg-2-4-custom mb-4">
-            <div class="card h-100" id="cardProducto">
-                <div class="card-header">
-                    <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
-                        class="img-fluid producto-img" @click="acciones(producto.id)" :id="`img_${producto.id}`"
-                        :class="{ 'desenfocarImagen': imagenDesenfocada }">
-                    <div class="position-absolute acciones" :id="`accion_${producto.id}`" style="display: none;">
-                        <div class="btn-goup-vertical" role="group">
-                            <button type="button" id="btnVerProducto" class="btn" data-bs-toggle="tooltip"
-                                data-bs-placement="top" title="Ver producto" @click="selecProducto(producto.id)">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn" id="btnCarrito" @click="addTopCart(producto)">
-                                <div v-if="carrito">
-                                    <i class="bi bi-cart-check" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Agregar a carrito"></i>
-                                </div>
-                                <div v-else>
-                                    <i class="bi bi-cart-plus" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" title="Agregado a carrito"></i>
-                                </div>
-                            </button>
+    <div v-if="catalogo.length">
+        <div class="row g-1" id="catalogo">
+            <div v-for="producto in catalogo" :key="producto.id" class="col-12 col-sm-6 col-lg-2-4-custom mb-4">
+                <div class="card h-100" id="cardProducto">
+                    <div class="card-header">
+                        <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
+                            class="img-fluid producto-img" @click="acciones(producto.id)" :id="`img_${producto.id}`"
+                            :class="{ 'desenfocarImagen': imagenDesenfocada }">
+                        <div class="position-absolute acciones" :id="`accion_${producto.id}`" style="display: none;">
+                            <div class="btn-goup-vertical" role="group">
+                                <button type="button" id="btnVerProducto" class="btn" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Ver producto" @click="selecProducto(producto.id)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn" id="btnCarrito" @click="addTopCart(producto)">
+                                    <div v-if="carrito">
+                                        <i class="bi bi-cart-check" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Agregar a carrito"></i>
+                                    </div>
+                                    <div v-else>
+                                        <i class="bi bi-cart-plus" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" title="Agregado a carrito"></i>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <h5>{{ producto.producto }}</h5>
-                    <div class="row pb-2">
-                        <div class="col-md-6 text-start">
-                            <span>
-                                <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
-                            </span>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <small>
-                                <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
-                            </small>
+                    <div class="card-body">
+                        <h5>{{ producto.producto }}</h5>
+                        <div class="row pb-2">
+                            <div class="col-md-6 text-start">
+                                <span>
+                                    <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
+                                </span>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small>
+                                    <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <modalProducto
+            :producto=prodConsultado
+            :visible="mostrarModal"
+            @cerrar-modal="cerrarModal"/>
     </div>
-    <modalProducto
-        :producto-id="idProducto"
-        :visible="mostrarModal"
-        @cerrar-modal="cerrarModal"/>
+    <div v-else class="row g-1" id="catalogo">
+        <div class="col-12">
+            <h4 class="text-center pb-2">No se encontraron amigurumis</h4>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -74,8 +81,8 @@
     const imagenDesenfocada = ref(false);
     // Variable para almacenar productos
     const catalogo = ref([]);
-    const listarProductos = async (type) => {
-        getProductos(type).then(
+    const listarProductos = async (params) => {
+        getProductos(params).then(
             (data) => {
                 catalogo.value = data.productos;
             }
@@ -91,21 +98,41 @@
     // Llama los archivos al iniciar la página
     // Escucha el cambio del tipo de producto
     onMounted(() => {
-        listarProductos(0);
+        listarProductos({'cambioTipo': 0});
     });
     const currentTipo = computed(() => cartStore.tipoEntrega);
 
-    watch(() => cartStore.tipoEntrega, (newType) => {
-        listarProductos(newType);
+    watch(() => cartStore.tipoEntrega, (params) => {
+        listarProductos(params);
     })
-    //
+    // obtenemos el id del producto
     const selecProducto = (id) => {
         idProducto.value = id;
         mostrarModal.value = true;
+        obtenerProducto(id);
         // Oculta los botones de acción
         ocultaBotones();
     }
-
+    // Se hace consulta el producto
+    // Arreglo para almacenar producto
+    const prodConsultado = ref({});
+    const obtenerProducto = async (idprod) => {
+        // Espera la respuesta del servicio
+        const response = await productoById(idprod);
+        if (response?.producto) {
+            const data = response.producto;
+            prodConsultado.value = {
+                'id': data['id'],
+                'imagen': data['imagen'],
+                'producto': data['producto'],
+                'precio': data['precio'],
+                'dimensiones': data['dimensiones'],
+                'disponibilidad': data['disponibilidad'],
+                'inventario': data['inventario'],
+                'comentario': data['comentario']
+            };
+        }
+    }
     function cerrarModal() {
         mostrarModal.value = false;
         idProducto.value = null;
@@ -120,6 +147,14 @@
             muestraBotones(idProducto);
         }
     }
+    // Identifica al darse un click fuera de la imagen
+    $(window).on('click', function (event) {
+        // Valida que no se hayda dado click en una imagen de producto+
+        if (!event.target.classList.contains('desenfocarImagen')) {
+            ocultaBotones();
+
+        }
+    });
 
     // Acción para ocultar botones de acción
     const ocultaBotones = () => {

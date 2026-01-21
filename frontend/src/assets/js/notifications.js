@@ -17,6 +17,15 @@ const alertas = {
             showConfirmButton: false,
             timer: 1500
         });
+    },
+
+    alertWarning(mensaje) {
+        Swal.fire({
+            icon: 'warning',
+            title: mensaje,
+            showConfirmButton: true,
+            timer: 1500
+        });
     }
 }
 

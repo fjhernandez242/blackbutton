@@ -12,7 +12,9 @@ class catalogo_model(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Precio', null=True, blank=True)
     dimensiones = models.DecimalField(max_digits=10, decimal_places=1, verbose_name='Dimensiones', null=True, blank=True)
     imagen = models.ImageField(upload_to='catalogo/' ,null=True, blank=True)
-    tipo_entrega = models.IntegerField(default=tipo_de_entrega.INMEDIATA, choices=tipo_de_entrega.choices, verbose_name='Tipo de entrega', null=True, blank=True)
+    disponibilidad = models.IntegerField(default=tipo_de_entrega.INMEDIATA, choices=tipo_de_entrega.choices, verbose_name='Tipo de entrega', null=True, blank=True)
+    inventario = models.IntegerField(verbose_name='Inventario', null=True, blank=True)
+    comentario = models.TextField(null=True, blank=True)
     fecha_registro = models.DateTimeField(verbose_name='Fecha de regsitro', null=True, blank=True)
 
     class Meta:

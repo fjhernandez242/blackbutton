@@ -8,7 +8,7 @@ export const useCartStore = defineStore('cart', {
     state: () => ({
         // 'items' será un array de objetos, donde cada objeto es un producto en el carrito
         items: [],
-        tipoEntrega: 0
+        tipoEntrega: { 'cambioTipo': 0 }
     }),
 
     // Los 'actions' son las funciones que modifican el estado (añadir, quitar, etc.)
@@ -46,8 +46,8 @@ export const useCartStore = defineStore('cart', {
 
             return id;
         },
-        cambiarTipoEntrega(id) {
-            this.tipoEntrega = id;
+        cambiarTipoEntrega(params) {
+            this.tipoEntrega = params;
         },
     },
 
