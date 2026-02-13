@@ -56,7 +56,6 @@
     import { useCartStore } from '@/store/cartStore.js';
     import alerts_success from './alerts_success.vue';
     import offcanvas from './offcanvas.vue';
-
     const loader = ref([]);
     // Instancia del store
     const cartStore = useCartStore();
@@ -80,7 +79,7 @@
 
     // Escucha cuando cambia el valor para tipo de entrega, limpia campo search
     watch(() => cartStore.tipoEntrega, (nuevoValor, viejoValor) => {
-        console.log(nuevoValor.cambioTipo);
+
         if (nuevoValor.cambioTipo != undefined) {
             v_search.value = '';
         }

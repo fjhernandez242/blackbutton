@@ -104,8 +104,6 @@
         () => props.producto,
         (prod) => {
             if (prod) {
-                console.log(prod);
-
                 // Lógica para cargar los datos del trabajo con este ID
                 idLocal.value = prod.id;
                 // Se obtiene los datos

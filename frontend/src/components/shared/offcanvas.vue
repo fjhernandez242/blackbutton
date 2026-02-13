@@ -1,7 +1,20 @@
 <template>
     <!-- Zona de carro para compras -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-
+        <div class="msgInfo" id="msgEnvio">
+            <h4><b>¿Cómo te llega tu producto?</b></h4>
+            <small>
+                Se hace envios a toda la Republica Méxicana, el envio se realiza por
+                medio de Correos de México.
+            </small>
+        </div>
+        <div class="msgInfo" id="msgEncargo">
+            <h4><b>¿Cómo finalizo mi pago?</b></h4>
+            <small>
+                El proceso final se realizar con ayuda de WhatsApp, al presionar el botón <b>Completar pedido</b> se te
+                redirigirá a WhatsApp para que puedas realizar la siguiente fase del proceso.
+            </small>
+        </div>
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasRightLabel"><b>Mi carrito</b></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -75,7 +88,7 @@
                     </div>
                 </div>
                 <div id="btn_pedido">
-                    <button class="btn btn-sm">Realizar pedido</button>
+                    <button class="btn btn-sm" @click="solicitar()">Completar pedido</button>
                 </div>
             </div>
         </div>
@@ -85,6 +98,8 @@
 <script setup>
     import { useCartStore } from '@/store/cartStore.js';
     import { API_BASE_URL } from '@/config/api-urls';
+    import alertas from '@/assets/js/notifications';
+    import { sendMessage } from '@/services/email-services';
     // Recopilado de productos cargados en carrito
     // Instancia del store
     const cartStore = useCartStore();
@@ -106,9 +121,38 @@
     const rutaImagen = (urlRelativa) => {
         return `${API_BASE_URL}${urlRelativa}`;
     }
+
+    // Detecta el clic para pedido de productos
+    const solicitar = async () => {
+        const result = await alertas.alertQuestion('¿Completar pedido?');
+        if (result.isConfirmed) {
+            // const typeSend = await alertas.questionTypeSend();
+            sendMessage();
+            location.reload(true);
+        }
+
+    }
 </script>
 
 <style scoped>
+    .msgInfo {
+        position: absolute;
+        background-color: rgb(238, 247, 255);
+        padding: 2rem;
+        border-radius: 50px 0 80px 20px;
+        right: 26rem;
+        left: -30rem;
+        box-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
+    #msgEnvio {
+        top: 3rem;
+    }
+
+    #msgEncargo {
+        top: 13rem;
+    }
+
     #cardCarrito {
         padding: 5px;
         border: none;

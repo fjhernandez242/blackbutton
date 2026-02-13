@@ -12,7 +12,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-pen"></i></span>
                                 <input type="text" class="form-control limpiarCampo" name="producto" id="producto"
-                                    v-model="v_producto" required>
+                                    v-model="v_producto" placeholder="Nombre" required>
                                 <div class="invalid-feedback">
                                 Por favor indica su nombre!
                                 </div>
@@ -22,8 +22,8 @@
                             <label for="precio" class="form-label">¿Qué valor le colocaras?</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">$</span>
-                                <input type="text" class="form-control limpiarCampo" name="precio" id="precio"
-                                v-model="v_precio" required>
+                                <input type="number" step="any" class="form-control limpiarCampo" name="precio" id="precio"
+                                v-model="v_precio" placeholder="0" required>
                                 <div class="invalid-feedback">
                                 Por favor indique el precio!
                                 </div>
@@ -34,7 +34,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-box-seam-fill"></i></span>
                                 <input type="number" class="form-control limpiarCampo" name="inventario" id="inventario"
-                                v-model="v_inventario" required>
+                                v-model="v_inventario" placeholder="0" required>
                                 <div class="invalid-feedback">
                                 Por favor indique la cantidad en existencia!
                                 </div>
@@ -44,8 +44,8 @@
                             <label for="dimensiones" class="form-label">¿Cuál es su medida?</label>
                             <div class="input-group md-3">
                                 <span class="input-group-text"><i class="bi bi-rulers"></i></span>
-                                <input type="text" class="form-control limpiarCampo" name="dimensiones" id="dimensiones"
-                                    v-model="v_dimensiones" required>
+                                <input type="number" step="any" class="form-control limpiarCampo" name="dimensiones"
+                                    id="dimensiones" v-model="v_dimensiones" placeholder="Medida" required>
                                 <div class="invalid-feedback">
                                 Por favor indique las dimensiones!
                                 </div>
@@ -57,7 +57,7 @@
                                 <span class="input-group-text"><i class="bi bi-cart-fill"></i></span>
                                 <select class="form-select limpiarCampo" name="disponibilidad" id="disponibilidad"
                                     v-model="v_disponible" required>
-                                    <option selected>- Indica la disponibilidad -</option>
+                                    <option value="" selected disabled>- Indica la disponibilidad -</option>
                                     <option value="1">Entrega Inmediata</option>
                                     <option value="2">Sobre pedido</option>
                                 </select>
@@ -77,7 +77,8 @@
                             <label for="comentario" class="form-label">Agrega un comentario</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-chat-dots-fill"></i></span>
-                                <textarea id="comentario" class="form-control limpiarCampo" v-model="v_comentario"></textarea>
+                                <textarea id="comentario" class="form-control limpiarCampo" v-model="v_comentario"
+                                placeholder="Comentario"></textarea>
                             </div>
                         </div>
                         <div class="col-md-10"></div>
@@ -99,12 +100,14 @@
     import { cargarProducto } from '@/services/catalogo-services';
     // Importa script para notificaciones SweetAlert2
     import alertas from '@/assets/js/notifications';
+    // Importa archivo de errores
+    import { getErrorMessages } from '@/assets/errorMessages';
 
     const v_producto = defineModel('producto');
     const v_precio = defineModel('precio');
     const v_dimensiones = defineModel('dimensiones');
-    const v_disponible = defineModel('disponibilidad');
-    const v_inventario = defineModel('inventario');
+    const v_disponible = ref("");
+    const v_inventario = defineModel('invetnario');
     const v_comentario = defineModel('comentario');
 
     const archivoInput = ref(null);
@@ -126,10 +129,18 @@
             "comentario": v_comentario.value,
             "imagen": archivoInput.value.files[0]
         }
+        // Control formulario
+        if (v_inventario.value <= 0 && v_disponible.value == 1) {
+            camposCompletos.value = false;
+            alertas.alertWarning(getErrorMessages(100), false, 2500);
+            enviando.value = false;
+        }
+        // Menejo de formulario, campos vacios
         $.each(producto, function (index, element) {
-            if (element == undefined) {
+            // Campos requeridos
+            if ((element == undefined && index != 'comentario') || element == '') {
                 camposCompletos.value = false;
-                alertas.alertWarning('Campos faltantes');
+                alertas.alertWarning(getErrorMessages(101), false);
                 enviando.value = false;
             }
         });
@@ -143,7 +154,7 @@
                     } else {
                         enviando.value = false;
                         limpiarCampo();
-                        alertas.alertSuccess('¡Producto agregado!');
+                        alertas.alertSuccess(getErrorMessages(200));
                     }
                 }
             );

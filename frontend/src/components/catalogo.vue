@@ -60,7 +60,7 @@
     import { ref, onMounted, watch, computed } from 'vue';
     import { API_BASE_URL } from '@/config/api-urls';
     // Importa modal
-    import modalProducto from './modalProducto.vue';
+    import modalProducto from './modal/modalProducto.vue';
     // Importa el servicio para listar productos
     import { getProductos, productoById } from '@/services/catalogo-services';
     // import mensajes de error
