@@ -51,6 +51,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,9 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'server.urls'
@@ -146,7 +146,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
+    "https://blackbuttondev.fjdev.icu",
+    "https://blackbuttonbackend.fjdev.icu",
     "http://localhost:5173",
-    "http://localhost:8000",
-    "74.208.155.22"
+    "http://127.0.0.1:5173",
 ]
+
+ALLOWED_HOSTS = [
+    "blackbuttondev.fjdev.icu",
+    "blackbuttonbackend.fjdev.icu",
+    "localhost",
+    "127.0.0.1"
+]
+
+CORS_ALLOW_CREDENTIALS = True

@@ -1,5 +1,5 @@
 // Url base
-export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu';
+export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
 // Urls endpoint
 export const URLS = {
     // Obtiene todos los usuarios

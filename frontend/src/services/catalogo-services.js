@@ -34,7 +34,7 @@ export function cargarProducto(params) {
         method: 'POST',
         body: formData,
         headers: {
-            'Authorization': "Token 6970ab58d53f6bd8c94183a3360512762ac52a06"
+            'Authorization': "Token ba272486f37c7250b28ff645d6d0d31ef34e49b1"
         }
     }).then(
         (response) => {
