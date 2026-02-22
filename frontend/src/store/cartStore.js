@@ -17,19 +17,19 @@ export const useCartStore = defineStore('cart', {
          * Agrega un producto al carrito. Si ya existe, incrementa la cantidad.
          * @param {Object} product - El producto a añadir (debe tener id, nombre, precio, etc.)
          */
-        addItem(product) {
+        addItem(product, cantidad) {
 
             const notify = useNotificationStore();
             const existingItem = this.items.find(item => item.id === product.id);
 
             if (existingItem) {
                 // Si el producto ya existe, solo aumentamos la cantidad
-                existingItem.quantity++;
+                existingItem.quantity = parseInt(existingItem.quantity) + parseInt(cantidad);
             } else {
                 // Si es un producto nuevo, lo agregamos con quantity: 1
                 this.items.push({
                     ...product,
-                    quantity: 1,
+                    quantity: parseInt(cantidad),
                 });
             }
             notify.lanzarAlerta(`Se añadio ${product.producto} al carrito`);

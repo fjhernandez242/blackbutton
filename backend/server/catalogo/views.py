@@ -27,12 +27,13 @@ def productos(request):
         search = data['search']
         get_productos = catalogo_model.objects.filter(
             Q(producto__icontains=search) |
-            Q(precio__icontains=search)
+            Q(precio__icontains=search) |
+            ~Q(estado='R')
         ).distinct()
     else :
         if data['cambioTipo'] == 0:
             # se obienen todos los productos
-            get_productos = catalogo_model.objects.all()
+            get_productos = catalogo_model.objects.exclude(estado='R')
         else:
             # Se obtienen solo los productos del tipo indicado
             get_productos = catalogo_model.objects.filter(tipo_entrega=data['cambioTipo'])
@@ -174,14 +175,23 @@ def agregar_pedido(request):
     return Response({ "success": "Pedido cargado", "code": code_pedido }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-def setterEstadoProduto(request):
+def setterProduto(request):
     data = request.data
 
     producto = catalogo_model.objects.get(id=data['id'])
     if not producto:
         return Response({"error": "No se pudo encontrar el producto"}, status=status.HTTP_404_NOT_FOUND)
+    # Revisa si hay sufiente stock
+    if producto.inventario < int(data['cantidad']):
+        return Response({"error": "No hay suficiente stock"}, status=status.HTTP_426_UPGRADE_REQUIRED)
+    # Se obtiene la resta de productos
+    nueva_cantidad = producto.inventario - int(data['cantidad'])
     try:
-        producto.estado = data['estado']
+        if nueva_cantidad == 0:
+            producto.inventario = nueva_cantidad
+            producto.estado = 'R'
+        else:
+            producto.inventario = nueva_cantidad
         producto.save()
     except:
         return Response({"error": "No se pudo cambiar estado del producto"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

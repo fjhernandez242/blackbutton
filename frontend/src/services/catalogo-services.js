@@ -95,10 +95,10 @@ export function agregarPedido(params) {
     );
 }
 // Cambia estado del producto
-export function setterEstadoProducto(params) {
-    return fetch(URLS.SETTER_ESTADO, {
+export function setterProducto(params) {
+    return fetch(URLS.SETTER_PRODUCTO, {
         method: 'POST',
-        body: params,
+        body: JSON.stringify(params),
         headers: {
             "Content-Type": "application/json"
         }

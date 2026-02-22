@@ -8,5 +8,5 @@ urlpatterns = [
     re_path('eliminar', views.eliminar_producto),
     re_path('productoId', views.getProductoById),
     re_path('agregarPedido', views.agregar_pedido),
-    re_path('setterEstado', views.setterEstadoProduto),
+    re_path('setterProducto', views.setterProduto),
 ]

@@ -17,5 +17,5 @@ export const URLS = {
     // Url para agregar pedido
     AGREGAR_PEDIDO: `${API_BASE_URL}/catalogo/agregarPedido`,
     // Url para cambiar el estado del producto
-    SETTER_ESTADO: `${API_BASE_URL}/catalogo/setterEstado`,
+    SETTER_PRODUCTO: `${API_BASE_URL}/catalogo/setterProducto`,
 };

@@ -15,10 +15,22 @@
 
 
 <style scoped>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        text-align: center;
+    }
+
     #content {
-    padding-top: 70px;
-    padding-left: 160px;
-    padding-right: 160px;
+        padding-top: 70px;
+        height: 100%;
     }
 
     #panel-full {
@@ -27,4 +39,6 @@
         width: 100%;
         min-height: 100vh;
     }
+
+
 </style>

@@ -25,11 +25,9 @@
                 <i class="bi bi-emoji-frown"></i>
             </div>
             <div class="row">
-                <div v-for="producto in productos" class="col-12 col-sm-12 mb-4 d-flex justify-content-center">
+                <div v-for="producto in productos" class="col-12 col-sm-12 mb-2 d-flex justify-content-center">
                     <div class="card" id="cardCarrito">
-                        <div class="card-bod">
-                            <div class="d-flex justify-content-end">
-                            </div>
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-10">
                                     <div class="d-flex">
@@ -62,14 +60,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="card-footer badge bg-warning text-dark" style="font-size: 13px;">
+                            <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
+                            <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div v-if="cartStore.totalItemsCount > 0">
-            <div id="linea_divisora">
-                <span id="linea"></span>
-            </div>
             <div class="p-3" id="total_info">
                 <div class="row">
                     <div class="col-6">
@@ -176,7 +175,6 @@
     }
 
     #cardCarrito {
-        padding: 5px;
         border: none;
         max-width: 90%;
         box-shadow: 0 7px 15px rgb(181, 52, 113);
@@ -186,17 +184,6 @@
         max-width: 27%;
         margin-inline: 2%;
         border-radius: 10px;
-    }
-
-    #linea_divisora {
-        display: flex;
-        justify-content: center;
-    }
-
-    #linea_divisora #linea {
-        background-color: rgba(0, 0, 0, 0.212);
-        width: 90%;
-        height: 1px;
     }
 
     #btn_pedido {
