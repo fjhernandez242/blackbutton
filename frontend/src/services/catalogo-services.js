@@ -1,5 +1,4 @@
 import { URLS } from "@/config/api-urls";
-import { effectScope } from "vue";
 
 // Listar productos
 export function getProductos(params) {
@@ -112,4 +111,28 @@ export function setterProducto(params) {
             return response.json()
         }
     )
+}
+// Apartar producto
+export function apartarProducto(params, id_temp = "") {
+
+    return fetch(URLS.APARTAR_PRODUCTO, {
+        method: 'POST',
+        body: JSON.stringify({
+            "id_prod": params['id_prod'],
+            "cantidad": params['cantidad'],
+            "codigo_temp": id_temp
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(
+        (response) => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
+                });
+            }
+            return response.json()
+        }
+    );
 }

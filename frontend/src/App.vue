@@ -9,8 +9,27 @@
 <script setup>
     import header_vue from './views/shared/header.vue';
     import { useRoute } from 'vue-router';
+    import { useCartStore } from './store/cartStore';
+    import { onMounted } from 'vue';
+    import alertas from './assets/js/notifications';
+
+    const cartStore = useCartStore();
 
     const route = useRoute(); // Esto nos permite acceder a la info de la URL actual
+
+    onMounted(() => {
+        cartStore.iniciarTemporizador();
+        // if (cartStore.expiracion.time_expira) {
+        //     const ahora = new Date();
+        //     const expiracion = new Date(cartStore.expiracion.time_expira);
+        //     if (ahora > expiracion) {
+        //         // El tiempo pasó mientras la página estaba cerrada/recargando
+        //         cartStore.$reset(); // Limpia el store
+        //         localStorage.removeItem('miCarrito');
+        //         alertas.alertWarning("Tu reserva de muñecos ha expirado", false);
+        //     }
+        // }
+    });
 </script>
 
 

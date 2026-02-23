@@ -52,4 +52,30 @@ class pedidos_model(models.Model):
         verbose_name_plural="Pedidos"
 
     def __str__(self):
-        return self.codigoVenta
+        return self.codigo_venta
+
+class cookietem_header_model(models.Model):
+
+    codigo_temp = models.CharField(max_length=255, verbose_name="Código temporal", null=True, blank=True)
+    fecha_expiracion = models.DateTimeField(verbose_name="Fecha de expiración", null=True, blank=True)
+    fecha_registro = models.DateTimeField(verbose_name="Fecha de expiración", null=True, blank=True)
+
+    class Meta:
+        verbose_name="Encabezado"
+        verbose_name_plural="Encabezados"
+
+    def __str__(self):
+        return self.codigo_temp
+
+class cookietem_body_model(models.Model):
+
+    id_codigo = models.CharField(max_length=255, verbose_name="Relación codigo con tabla header", null=True, blank=True)
+    producto_id = models.IntegerField(verbose_name="Id del producto", null=True, blank=True)
+    cantidad_prod = models.IntegerField(verbose_name="Cantidad de productos apartados", null=True, blank=True)
+
+    class Meta:
+        verbose_name="Cuerpo"
+        verbose_name_plural="Cuerpos"
+
+    def __str__(self):
+        return self.id_codigo

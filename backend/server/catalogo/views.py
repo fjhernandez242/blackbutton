@@ -2,13 +2,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from .serializers import CatalogoSerializer, PedidoSerializer
+from .serializers import CatalogoSerializer, PedidoSerializer, HeaderApartadosSerializer, BodyApartadosSerializer
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
-from .models import catalogo_model, pedidos_model
+from .models import catalogo_model, pedidos_model, cookietem_header_model, cookietem_body_model
 from django.utils import timezone
+from datetime import timedelta
 
 from .forms import CatalogoForm
 from django.db.models import Q
@@ -196,6 +197,77 @@ def setterProduto(request):
     except:
         return Response({"error": "No se pudo cambiar estado del producto"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({"success": "Estado cambiado con exito"}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def apartados(request):
+    data = request.data
+    actualizar = False
+
+    producto = catalogo_model.objects.get(id=data['id_prod'])
+    if not producto:
+        return Response({"error": "No se pudo encontrar el producto"}, status=status.HTTP_404_NOT_FOUND)
+    # Si no viene un codigo temporal, lo genera
+    if data['codigo_temp'] == "":
+        # Genera y valida codigo temporal
+        cont = 0
+        while True:
+            cont+=1
+            codigo = genera_codigo_venta()
+            exist_codigo = cookietem_header_model.objects.filter(codigo_temp=codigo)
+            if exist_codigo.exists():
+                if cont > 50:
+                    return Response({"error": "No fue posible apartar el producto"}, status=status.HTTP_404_NOT_FOUND)
+                continue
+            else:
+                break
+    else:
+        codigo = data['codigo_temp']
+        actualizar = True
+    try:
+        if not actualizar:
+            # Agrega nuevo registro
+            timeexpired = timezone.now() + timedelta(minutes=2)
+            cookietem_header_model.objects.create(
+                codigo_temp = codigo,
+                fecha_expiracion = timeexpired,
+                fecha_registro = timezone.now()
+            )
+            cookietem_body_model.objects.create(
+                id_codigo = codigo,
+                producto_id = data['id_prod'],
+                cantidad_prod = data['cantidad']
+            )
+            return Response({ "success": "Producto apartado", "cod_tem": codigo, "time_expired": timeexpired.isoformat() }, status=status.HTTP_200_OK)
+        else:
+            temporal = cookietem_header_model.objects.get(codigo_temp=codigo)
+            if not temporal:
+                return Response({"error": "No se pudo encontrar la información temporal"}, status=status.HTTP_404_NOT_FOUND)
+            # Actualiza la información
+            temporal_producto = cookietem_body_model.objects.filter(id_codigo=codigo, producto_id=data['id_prod']).first()
+            if not temporal_producto:
+                cookietem_body_model.objects.create(
+                    id_codigo = codigo,
+                    producto_id = data['id_prod'],
+                    cantidad_prod = data['cantidad']
+                )
+            else:
+                temporal_producto.cantidad_prod = temporal_producto.cantidad_prod + int(data['cantidad'])
+                temporal_producto.save()
+
+            return Response({ "success": "Producto actualizado", "cod_tem": codigo }, status=status.HTTP_200_OK)
+    except:
+        return Response({"error": "Algo salio mal al apartar produto"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def obtener_expiracion(request):
+    data = request.data
+
+    expiracion = cookietem_header_model.objects.get(codigo_temp=data['codigo'])
+    if not expiracion:
+        return Response({"error": "No hay registro de expiración"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = HeaderApartadosSerializer(instance=expiracion)
+    return Response({ "productos": serializer.data }, status=status.HTTP_200_OK)
 
 def genera_codigo_venta(limit=6):
     import random, string

@@ -48,7 +48,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="card-footer badge bg-warning text-dark" style="font-size: 17px;">
+                        <div class="card-footer badge text-dark footerInfo">
                             <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
                             <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
                         </div>
@@ -74,7 +74,7 @@
     // Importa modal
     import modalProducto from './modal/modalProducto.vue';
     // Importa el servicio para listar productos
-    import { getProductos, productoById, setterProducto } from '@/services/catalogo-services';
+    import { getProductos, productoById, setterProducto, apartarProducto } from '@/services/catalogo-services';
     // import mensajes de error
     import alertas from '@/assets/js/notifications';
     // props
@@ -102,15 +102,31 @@
     };
     // Cambia el estado del producto
     const ctrlInventario = async (params, cantidad) => {
-        const params_setter = {
+        let codigo_temp = "";
+        const response = await setterProducto({
             "id": params.id,
             "cantidad": cantidad
-        }
-        const response = await setterProducto(params_setter);
+        });
         if (response.error) {
             alertas.alertError(response.error);
         }
-
+        let param_apartado = {
+            "id_prod": params.id,
+            "cantidad": cantidad
+        }
+        // Si ya existe un codigo de temporal para el usuario se agrega
+        if (cartStore.expiracion.id_temp) {
+            codigo_temp = cartStore.expiracion.id_temp || null;
+        }
+        const apartado = await apartarProducto(param_apartado, codigo_temp);
+        if (apartado.error) {
+            alertas.alertError(response.error);
+        } else {
+            // Guarda el codigo temporal y la fecha de expración
+            cartStore.setTemp(apartado.cod_tem, apartado.time_expired);
+            // Actualiza los productos en web
+        }
+        listarProductos({'cambioTipo': 0});
     };
     const listarProductos = async (params) => {
         getProductos(params).then(
@@ -129,6 +145,7 @@
     // Llama los archivos al iniciar la página
     // Escucha el cambio del tipo de producto
     onMounted(() => {
+        // Recarga de catalogo
         listarProductos({'cambioTipo': 0});
     });
     const currentTipo = computed(() => cartStore.tipoEntrega);
@@ -166,6 +183,7 @@
         mostrarModal.value = false;
         idProducto.value = null;
     }
+
 </script>
 
 <style scoped>
@@ -244,6 +262,10 @@
 
     .btn_carrito:hover {
         background-color: #c56cf0;
+    }
+
+    .footerInfo {
+        font-size: 17px; background: linear-gradient(to right, rgba(76, 0, 255, 0.685), #B53471);
     }
 
     /** media */

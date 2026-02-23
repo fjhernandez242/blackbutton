@@ -1,5 +1,6 @@
 // Url base
-export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
+// export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
+export const API_BASE_URL = 'http://localhost:8000';
 // Urls endpoint
 export const URLS = {
     // Obtiene todos los usuarios
@@ -18,4 +19,8 @@ export const URLS = {
     AGREGAR_PEDIDO: `${API_BASE_URL}/catalogo/agregarPedido`,
     // Url para cambiar el estado del producto
     SETTER_PRODUCTO: `${API_BASE_URL}/catalogo/setterProducto`,
+    // Url para el apartado de producto
+    APARTAR_PRODUCTO: `${API_BASE_URL}/catalogo/apartarProducto`,
+    // Url para obtener expiracion
+    OBTENER_EXPIRACION: `${API_BASE_URL}/catalogo/obtenerExpiracion`,
 };

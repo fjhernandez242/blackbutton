@@ -2,14 +2,25 @@
 
 import { defineStore } from 'pinia';
 import { useNotificationStore } from './notificationStore';
+import alertas from '@/assets/js/notifications';
 
 export const useCartStore = defineStore('cart', {
+
     // El 'state' es donde se guarda la información (el carrito en sí)
-    state: () => ({
-        // 'items' será un array de objetos, donde cada objeto es un producto en el carrito
-        items: [],
-        tipoEntrega: { 'cambioTipo': 0 }
-    }),
+    state: () => {
+        const savedCart = localStorage.getItem('miCarrito');
+        const parsed = savedCart ? JSON.parse(savedCart) : null;
+
+        return {
+            // Si 'parsed' tiene 'items', los usa; si no, array vacío
+            items: parsed?.items || [],
+            tipoEntrega: parsed?.tipoEntrega || { "cambioTipo": 0 },
+            // Si 'parsed' tiene 'expiracion', la usa; si no, valores por defecto
+            expiracion: parsed?.expiracion || { 'id_temp': "", "time_expira": "" },
+            minutos: parsed?.minutos || 2,
+            segundos: parsed?.segundos || 59,
+        }
+    },
 
     // Los 'actions' son las funciones que modifican el estado (añadir, quitar, etc.)
     actions: {
@@ -17,6 +28,17 @@ export const useCartStore = defineStore('cart', {
          * Agrega un producto al carrito. Si ya existe, incrementa la cantidad.
          * @param {Object} product - El producto a añadir (debe tener id, nombre, precio, etc.)
          */
+        saveToLocalStorage() {
+            const dataSave = {
+                items: this.items,
+                expiracion: this.expiracion,
+                tipoEntrega: this.tipoEntrega,
+                minutos: this.minutos,
+                segundos: this.segundos
+            };
+            localStorage.setItem('miCarrito', JSON.stringify(dataSave));
+        },
+
         addItem(product, cantidad) {
 
             const notify = useNotificationStore();
@@ -33,6 +55,7 @@ export const useCartStore = defineStore('cart', {
                 });
             }
             notify.lanzarAlerta(`Se añadio ${product.producto} al carrito`);
+            this.saveToLocalStorage();
         },
         deleteItem(id) {
             const listadoItems = this.items.filter(item => item.id === id);
@@ -43,12 +66,54 @@ export const useCartStore = defineStore('cart', {
                 this.items = this.items.filter(item => item.id !== id);
             }
 
-
+            this.saveToLocalStorage();
             return id;
         },
         cambiarTipoEntrega(params) {
             this.tipoEntrega = params;
+            this.saveToLocalStorage();
         },
+        setTemp(id_temp, time_expira) {
+            this.expiracion.id_temp = id_temp;
+            this.expiracion.time_expira = time_expira;
+            this.saveToLocalStorage();
+
+        },
+        // Dentro de actions en cartStore.js
+        iniciarTemporizador() {
+            // Evitar múltiples intervalos si se llama a la función varias veces
+            if (this.intervalo) clearInterval(this.intervalo);
+
+            this.intervalo = setInterval(() => {
+                if (this.expiracion.time_expira) {
+                    const ahora = new Date();
+                    const fechaExpira = new Date(this.expiracion.time_expira);
+
+                    if (ahora > fechaExpira) {
+                        // TIEMPO AGOTADO
+                        clearInterval(this.intervalo);
+                        this.$reset();
+                        localStorage.removeItem('miCarrito');
+                        alertas.alertWarning("¡Tiempo agotado! Los muñecos han vuelto al taller.", false);
+                        setTimeout(() => location.reload(), 3000);
+                    } else {
+                        // CALCULAR TIEMPO RESTANTE REAL
+                        const diferenciaMs = fechaExpira - ahora;
+
+                        // Convertimos la diferencia real en minutos y segundos
+                        // Esto es mucho más seguro que restar manualmente
+                        this.minutos = Math.floor((diferenciaMs / 1000 / 60) % 60);
+                        this.segundos = Math.floor((diferenciaMs / 1000) % 60);
+
+                        // Formateo visual opcional en consola
+                        console.log(`${this.minutos}:${this.segundos < 10 ? '0' : ''}${this.segundos}`);
+
+                        // NOTA: No recomiendo saveToLocalStorage aquí cada segundo.
+                        // El tiempo ya está seguro en "time_expira" dentro del storage.
+                    }
+                }
+            }, 1000);
+        }
     },
 
     // Los 'getters' son como propiedades computadas para el store (para leer información)
