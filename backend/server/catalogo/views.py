@@ -138,33 +138,14 @@ def agregar_pedido(request):
     if not existe_producto:
         return Response({"error", "No se encontró el producto" }, status=status.HTTP_404_NOT_FOUND)
     # Se crea el código de venta
-    code_pedido = ''
-    cont = 0
-    code_check = True
-    while True:
-        # Define límite máximo de caracteres
-        limit = 6
-        # | Primer filtro| si pasa de 10 intentos, aumenta 1 en al límite máximo de caracteres
-        if cont > 10:
-            limit+=1
-        # | Segundo filtro | Si pasa de 20 intentos, se cancela el proceso
-        elif cont > 20:
-            code_check = False
-            break
-        code = genera_codigo_venta(limit)
-        # Revisa que no este repetido
-        existe_pedido = pedidos_model.objects.filter(codigo_venta=code)
-        if not existe_pedido.exists():
-            # Si todo esta en orden se salva el código y termina bucle
-            code_pedido = code
-            break
-        cont+=1
+    code_pedido = genera_codigo_venta()
     # | MÉTODO DE SEGURIDAD | Si no es posible generar el código, termina el proceso
-    if not code_check:
+    if not code_pedido:
         return Response({"error", "No fue posible agregar el pedido"}, status=status.HTTP_400_BAD_REQUEST)
     try:
         pedidos_model.objects.create(
             codigo_venta = code_pedido,
+            codigo_temp = data['codigo_temp'],
             id_producto = data['id'],
             cantidad_vendida = data['cantidad'],
             tipo_entrega = data['tipo_entrega'],
@@ -179,24 +160,45 @@ def agregar_pedido(request):
 def setterProduto(request):
     data = request.data
 
-    producto = catalogo_model.objects.get(id=data['id'])
-    if not producto:
-        return Response({"error": "No se pudo encontrar el producto"}, status=status.HTTP_404_NOT_FOUND)
-    # Revisa si hay sufiente stock
-    if producto.inventario < int(data['cantidad']):
-        return Response({"error": "No hay suficiente stock"}, status=status.HTTP_426_UPGRADE_REQUIRED)
-    # Se obtiene la resta de productos
-    nueva_cantidad = producto.inventario - int(data['cantidad'])
-    try:
-        if nueva_cantidad == 0:
-            producto.inventario = nueva_cantidad
-            producto.estado = 'R'
-        else:
-            producto.inventario = nueva_cantidad
-        producto.save()
-    except:
-        return Response({"error": "No se pudo cambiar estado del producto"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    return Response({"success": "Estado cambiado con exito"}, status=status.HTTP_200_OK)
+    if not data.get('codigo_temp'):
+        producto = catalogo_model.objects.get(id=data['id'])
+        if not producto:
+            return Response({"error": "No se pudo encontrar el producto"}, status=status.HTTP_404_NOT_FOUND)
+        # Revisa si hay sufiente stock
+        if producto.inventario < int(data['cantidad']):
+            return Response({"error": "No hay suficiente stock"}, status=status.HTTP_426_UPGRADE_REQUIRED)
+        # Se obtiene la resta de productos
+        nueva_cantidad = producto.inventario - int(data['cantidad'])
+        try:
+            if nueva_cantidad == 0:
+                producto.inventario = nueva_cantidad
+                producto.estado = 'R'
+            else:
+                producto.inventario = nueva_cantidad
+            producto.save()
+        except:
+            return Response({"error": "No se pudo cambiar estado del producto"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        apartados = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
+        if not apartados.exists():
+            return Response({"error": "No se encontró el apartado"}, status=status.HTTP_400_BAD_REQUEST)
+        existe_pedido = pedidos_model.objects.filter(codigo_temp=data['codigo_temp'])
+        if not existe_pedido.exists():
+            for apartado in apartados:
+                catalogo = catalogo_model.objects.filter(id=apartado.producto_id).first()
+                nueva_cantidad = catalogo.inventario + apartado.cantidad_prod
+                try:
+                    catalogo.inventario = nueva_cantidad
+                    catalogo.estado = 'D'
+                    catalogo.save()
+                except:
+                    return Response({"error": "No fue posible actualiar el producto"}, status=status.HTTP_400_BAD_REQUEST)
+                apartado.delete()
+            try:
+                cookietem_header_model.objects.filter(codigo_temp=data['codigo_temp']).delete()
+            except:
+                return Response({"error": "No fue el borrado de registro temporal"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"success": "Producto actualizado"}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def apartados(request):
@@ -209,17 +211,9 @@ def apartados(request):
     # Si no viene un codigo temporal, lo genera
     if data['codigo_temp'] == "":
         # Genera y valida codigo temporal
-        cont = 0
-        while True:
-            cont+=1
-            codigo = genera_codigo_venta()
-            exist_codigo = cookietem_header_model.objects.filter(codigo_temp=codigo)
-            if exist_codigo.exists():
-                if cont > 50:
-                    return Response({"error": "No fue posible apartar el producto"}, status=status.HTTP_404_NOT_FOUND)
-                continue
-            else:
-                break
+        codigo = genera_codigo_venta()
+        if not codigo:
+            return Response({"error": "No fue posible apartar el producto"}, status=status.HTTP_404_NOT_FOUND)
     else:
         codigo = data['codigo_temp']
         actualizar = True
@@ -254,7 +248,7 @@ def apartados(request):
                 temporal_producto.cantidad_prod = temporal_producto.cantidad_prod + int(data['cantidad'])
                 temporal_producto.save()
 
-            return Response({ "success": "Producto actualizado", "cod_tem": codigo }, status=status.HTTP_200_OK)
+            return Response({ "success": "Producto actualizado", "cod_tem": codigo, "time_expired": temporal.fecha_expiracion.isoformat() }, status=status.HTTP_200_OK)
     except:
         return Response({"error": "Algo salio mal al apartar produto"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -274,5 +268,23 @@ def genera_codigo_venta(limit=6):
 
     MiCadena = string.ascii_letters + string.digits
     # code1 = "".join(random.choice(MiCadena) for j in range(random.randint(2,2)))
-    code2 = "".join(random.choice(MiCadena) for j in range(random.randint(4,limit)))
-    return 'BK_' + code2
+    contador = 0
+    contension = False
+    while True:
+        contador+=1
+        if contador > 10:
+            limit+=1
+        code = "".join(random.choice(MiCadena) for j in range(random.randint(4,limit)))
+        exist_pedido = pedidos_model.objects.filter(codigo_temp='BK_' + code, estado=1)
+        exist_cookie = cookietem_header_model.objects.filter(codigo_temp='BK_' + code)
+        if exist_pedido.exists() or exist_cookie.exists():
+            if contador > 20:
+                contension = True
+                break
+            continue
+        break
+    if contension:
+        codigo = False
+    else:
+        codigo = 'BK_' + code
+    return codigo

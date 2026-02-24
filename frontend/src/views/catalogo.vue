@@ -1,5 +1,10 @@
 <template>
     <section class="container">
+        <div class="card" id="temporizador">
+            <div class="card-body">
+                <small>{{ temporizador }}</small>
+            </div>
+        </div>
         <div v-if="catalogo.length" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-1">
             <div v-for="producto in catalogo" :key="producto.id">
                 <div class="col">
@@ -85,6 +90,7 @@
     // Variable para almacenar productos
     const catalogo = ref([]);
     const cartStore = useCartStore();
+    const temporizador = defineModel('temporizador');
     // Agrega a carrito
     const addTopCart = (params) => {
         const idSearch = params.tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
@@ -102,7 +108,6 @@
     };
     // Cambia el estado del producto
     const ctrlInventario = async (params, cantidad) => {
-        let codigo_temp = "";
         const response = await setterProducto({
             "id": params.id,
             "cantidad": cantidad
@@ -110,19 +115,28 @@
         if (response.error) {
             alertas.alertError(response.error);
         }
-        let param_apartado = {
-            "id_prod": params.id,
-            "cantidad": cantidad
-        }
+        let param_apartado = {}
         // Si ya existe un codigo de temporal para el usuario se agrega
         if (cartStore.expiracion.id_temp) {
-            codigo_temp = cartStore.expiracion.id_temp || null;
+            param_apartado = {
+                "id_prod": params.id,
+                "cantidad": cantidad,
+                "codigo_temp": cartStore.expiracion.id_temp || null
+            }
+        } else {
+            param_apartado = {
+                "id_prod": params.id,
+                "cantidad": cantidad,
+                "codigo_temp": ""
+            }
         }
-        const apartado = await apartarProducto(param_apartado, codigo_temp);
+        const apartado = await apartarProducto(param_apartado);
         if (apartado.error) {
             alertas.alertError(response.error);
         } else {
             // Guarda el codigo temporal y la fecha de expración
+            $('#temporizador').show();
+            $('#temp_offcanvas').show();
             cartStore.setTemp(apartado.cod_tem, apartado.time_expired);
             // Actualiza los productos en web
         }
@@ -153,6 +167,22 @@
     watch(() => cartStore.tipoEntrega, (params) => {
         listarProductos(params);
     })
+    watch(() => cartStore.segundos, (seg) => {
+        temporizador.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
+        if (cartStore.minutos == 0 && seg == 0) {
+            devolver();
+        }
+
+    })
+    // Retorna de producto
+    const devolver = async () => {
+        const response = await setterProducto({
+            "codigo_temp": cartStore.expiracion.id_temp
+        });
+        if (response.error) {
+            alertas.alertError(response.error);
+        }
+    }
     // obtenemos el id del producto
     const selecProducto = (id) => {
         idProducto.value = id;
@@ -257,7 +287,7 @@
 
 
     .btn_carrito {
-        background-color: #B53471;
+        box-shadow: 0 2px 10px rgb(181, 52, 113);
     }
 
     .btn_carrito:hover {
@@ -265,7 +295,22 @@
     }
 
     .footerInfo {
-        font-size: 17px; background: linear-gradient(to right, rgba(76, 0, 255, 0.685), #B53471);
+        font-size: 17px;
+        /*background: linear-gradient(to right, rgba(76, 0, 255, 0.685), #B53471);*/
+        box-shadow: 0 7px 25px rgb(181, 52, 113);
+    }
+
+    #temporizador {
+        display: none;
+        position: fixed;
+        right: 0;
+        margin: 1rem;
+        z-index: 1;
+        box-shadow: 0 7px 25px rgb(181, 52, 113);
+    }
+
+    #temporizador .card-body {
+        font-weight: bold;
     }
 
     /** media */

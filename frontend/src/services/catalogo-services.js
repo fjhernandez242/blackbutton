@@ -33,7 +33,8 @@ export function cargarProducto(params) {
         method: 'POST',
         body: formData,
         headers: {
-            'Authorization': "Token ba272486f37c7250b28ff645d6d0d31ef34e49b1"
+            // 'Authorization': "Token ba272486f37c7250b28ff645d6d0d31ef34e49b1" // VPS
+            'Authorization': "Token 6970ab58d53f6bd8c94183a3360512762ac52a06" // Local
         }
     }).then(
         (response) => {
@@ -71,13 +72,14 @@ export function productoById(id) {
     )
 }
 // Agrega un nuevo pedido
-export function agregarPedido(params) {
+export function agregarPedido(params, codigo_temp) {
     return fetch(URLS.AGREGAR_PEDIDO, {
         method: 'POST',
         body: JSON.stringify({
             "id": params.id,
             "cantidad": params.quantity,
-            "tipo_entrega": params.tipo_entrega
+            "tipo_entrega": params.tipo_entrega,
+            "codigo_temp": codigo_temp
         }),
         headers: {
             "Content-Type": "application/json"
@@ -113,14 +115,14 @@ export function setterProducto(params) {
     )
 }
 // Apartar producto
-export function apartarProducto(params, id_temp = "") {
+export function apartarProducto(params) {
 
     return fetch(URLS.APARTAR_PRODUCTO, {
         method: 'POST',
         body: JSON.stringify({
             "id_prod": params['id_prod'],
             "cantidad": params['cantidad'],
-            "codigo_temp": id_temp
+            "codigo_temp": params.codigo_temp
         }),
         headers: {
             "Content-Type": "application/json"

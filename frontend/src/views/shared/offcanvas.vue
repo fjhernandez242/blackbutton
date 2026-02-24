@@ -20,6 +20,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
+            <div class="card" id="temp_offcanvas">
+                <div class="card-body">
+                    <small><b>Tiempo de apartado:</b> {{ temp_offcanvas }}</small>
+                </div>
+            </div>
             <div v-if="cartStore.totalItemsCount == 0">
                 <span>No hay amigurumis seleccionados </span>
                 <i class="bi bi-emoji-frown"></i>
@@ -95,10 +100,11 @@
 </template>
 
 <script setup>
+    import { watch } from 'vue';
     import { useCartStore } from '@/store/cartStore.js';
     import { API_BASE_URL } from '@/config/api-urls';
     import alertas from '@/assets/js/notifications';
-    import { agregarPedido } from '@/services/catalogo-services';
+    import { agregarPedido, cargarProducto } from '@/services/catalogo-services';
     import { sendMessage } from '@/services/email-services';
     // Recopilado de productos cargados en carrito
     // Instancia del store
@@ -130,20 +136,16 @@
             // sendMessage();
             // location.reload(true);
             const data = cartStore.items;
-            const productos = [];
             $.each(data, function (index, value) {
 
-                // productos.push(
-                //     {   "id": value.id,
-                //         "cantidad": value.quantity,
-                //         "tipo_entrega": value.tipo_entrega
-                //     });
-                agregarPedido(value).then(
+                agregarPedido(value, cartStore.expiracion.id_temp).then(
                     (response) => {
                          if (response.error) {
                         alertas.alertError(response.error);
                     } else {
                         sendMessage(response.code);
+                        cartStore.$reset();
+                        localStorage.removeItem('miCarrito');
                         location.reload(true);
                     }
                     }
@@ -153,6 +155,11 @@
         }
 
     }
+
+    const temp_offcanvas = defineModel('temp_offcanvas')
+    watch(() => cartStore.segundos, (seg) => {
+        temp_offcanvas.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
+    })
 </script>
 
 <style scoped>
@@ -208,5 +215,13 @@
         background-image: url('/src/assets/img/logo1_sinFondo_50opaci.png');
         background-size: 100%;
         background-position: center;
+    }
+
+    #temp_offcanvas {
+        display: none;
+        margin: 1rem;
+        z-index: 1;
+        font-size: 20px;
+        box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 </style>

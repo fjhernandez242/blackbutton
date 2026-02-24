@@ -16,7 +16,7 @@ export const sendMessage = (code) => {
             });
     });
     // Envio de mensaje por WhatsApp
-    const numero = "4641479724";
+    const numero = "+524641479724";
     const listaProductos = productos.map(p => {
         return `*• ${p.nombre}* ` +
             `\n      Cantidad: ${p.cantidad}` +

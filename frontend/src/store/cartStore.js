@@ -81,10 +81,12 @@ export const useCartStore = defineStore('cart', {
         },
         // Dentro de actions en cartStore.js
         iniciarTemporizador() {
+
             // Evitar múltiples intervalos si se llama a la función varias veces
             if (this.intervalo) clearInterval(this.intervalo);
 
             this.intervalo = setInterval(() => {
+
                 if (this.expiracion.time_expira) {
                     const ahora = new Date();
                     const fechaExpira = new Date(this.expiracion.time_expira);
@@ -95,7 +97,7 @@ export const useCartStore = defineStore('cart', {
                         this.$reset();
                         localStorage.removeItem('miCarrito');
                         alertas.alertWarning("¡Tiempo agotado! Los muñecos han vuelto al taller.", false);
-                        setTimeout(() => location.reload(), 3000);
+                        setTimeout(() => location.reload(), 1000);
                     } else {
                         // CALCULAR TIEMPO RESTANTE REAL
                         const diferenciaMs = fechaExpira - ahora;
@@ -106,7 +108,7 @@ export const useCartStore = defineStore('cart', {
                         this.segundos = Math.floor((diferenciaMs / 1000) % 60);
 
                         // Formateo visual opcional en consola
-                        console.log(`${this.minutos}:${this.segundos < 10 ? '0' : ''}${this.segundos}`);
+                        // console.log(`${this.minutos}:${this.segundos < 10 ? '0' : ''}${this.segundos}`);
 
                         // NOTA: No recomiendo saveToLocalStorage aquí cada segundo.
                         // El tiempo ya está seguro en "time_expira" dentro del storage.
