@@ -10,4 +10,13 @@ código de pedido y enviando junto con toda la información de los productos uti
 la api de whatsapp para que el usuario pueda comunicarse con la creadora de los
 productos.
 
+Entorno producción
+
+[Producción](https://blackbuttondev.fjdev.icu/)
+
+El proyecto esta desplegado en un servidor VPS utilizando:
+
+    Web Server: Ngix.
+    Aplication Server: Gunicorn
+    SSL
 
