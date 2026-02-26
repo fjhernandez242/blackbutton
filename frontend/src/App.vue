@@ -10,15 +10,10 @@
     import header_vue from './views/shared/header.vue';
     import { useRoute } from 'vue-router';
     import { useCartStore } from './store/cartStore';
-    import { onMounted } from 'vue';
 
     const cartStore = useCartStore();
 
     const route = useRoute(); // Esto nos permite acceder a la info de la URL actual
-
-    onMounted(() => {
-        cartStore.iniciarTemporizador();
-    });
 </script>
 
 

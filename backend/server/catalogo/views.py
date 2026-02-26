@@ -186,16 +186,35 @@ def setterProduto(request):
         if not existe_pedido.exists():
             for apartado in apartados:
                 catalogo = catalogo_model.objects.filter(id=apartado.producto_id).first()
-                nueva_cantidad = catalogo.inventario + apartado.cantidad_prod
+                if not data.get('id_prod'):
+                    suma = apartado.cantidad_prod
+                else:
+                    suma = 1
+                nueva_cantidad = catalogo.inventario + suma
                 try:
+                    # Actualiza catalogo
                     catalogo.inventario = nueva_cantidad
                     catalogo.estado = 'D'
                     catalogo.save()
+                    # Actualiza apartado
+                    if not data.get('id_prod'):
+                        apartado.delete()
+                    else:
+                        if (apartado.producto_id == data['id_prod']):
+                            if apartado.cantidad_prod == 1:
+                                apartado.cantidad_prod = apartado.cantidad_prod - 1
+                                apartado.delete()
+                            else:
+                                apartado.cantidad_prod = apartado.cantidad_prod - 1
+                                apartado.save()
                 except:
                     return Response({"error": "No fue posible actualiar el producto"}, status=status.HTTP_400_BAD_REQUEST)
-                apartado.delete()
             try:
-                cookietem_header_model.objects.filter(codigo_temp=data['codigo_temp']).delete()
+                # Al vaciarse la tabla de body, se borrará el encabezado
+                apartados_body = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
+                if not apartados_body.exists():
+                    # Realiza borrado del registro en tabla header
+                    cookietem_header_model.objects.filter(codigo_temp=data['codigo_temp']).delete()
             except:
                 return Response({"error": "No fue el borrado de registro temporal"}, status=status.HTTP_400_BAD_REQUEST)
     return Response({"success": "Producto actualizado"}, status=status.HTTP_200_OK)
@@ -220,7 +239,7 @@ def apartados(request):
     try:
         if not actualizar:
             # Agrega nuevo registro
-            timeexpired = timezone.now() + timedelta(minutes=2)
+            timeexpired = timezone.now() + timedelta(minutes=15)
             cookietem_header_model.objects.create(
                 codigo_temp = codigo,
                 fecha_expiracion = timeexpired,

@@ -61,7 +61,7 @@
                                         {{ producto.quantity }}
                                         <span class="visually-hidden">Productos en carrito</span>
                                     </span>
-                                    <button type="button" class="btn-close" @click="deleteProduct(producto.id)" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" @click="deleteProduct(producto.id, producto.tipo_entrega)" aria-label="Close"></button>
                                 </div>
                             </div>
                         </div>
@@ -100,11 +100,11 @@
 </template>
 
 <script setup>
-    import { watch } from 'vue';
+    import { watch, ref } from 'vue';
     import { useCartStore } from '@/store/cartStore.js';
     import { API_BASE_URL } from '@/config/api-urls';
     import alertas from '@/assets/js/notifications';
-    import { agregarPedido, cargarProducto } from '@/services/catalogo-services';
+    import { agregarPedido, setterProducto } from '@/services/catalogo-services';
     import { sendMessage } from '@/services/email-services';
     // Recopilado de productos cargados en carrito
     // Instancia del store
@@ -116,13 +116,41 @@
             default: null
     }});
     const emit = defineEmits(['carga_lista']);
-    const deleteProduct = (id) => {
+    const deleteProduct = (id, tipo_entrega) => {
         // Elimina el producto del carrito
         cartStore.deleteItem(id);
+        if (tipo_entrega == 1) {
+            let vaciado = {};
+            if (cartStore.totalItemsCount === 0) {
+                vaciado.tipo = 'total';
+            } else {
+                vaciado.id_prod = id;
+                vaciado.tipo = 'parcial';
+            }
+            devolver(vaciado);
+        }
         // Carga de nuevo los items en el Canvas
         emit('carga_lista');
     }
-
+    // Saca el producto del carrito de producto
+    const devolver = async (vaciado) => {
+        let params = {
+            "codigo_temp": cartStore.expiracion.id_temp
+        };
+        if (vaciado.tipo == 'parcial') {
+            params.id_prod = vaciado.id_prod;
+        }
+        const response = await setterProducto(params);
+        if (response.error) {
+            alertas.alertError(response.error);
+        }
+        if (vaciado.tipo == 'total') {
+            $('#temp_offcanvas').fadeOut();
+            $('#temporizador').fadeOut();
+            cartStore.detenerTemporizador();
+        }
+        emit('carga_lista');
+    }
     // Contruye la ruta de la imagen
     const rutaImagen = (urlRelativa) => {
         return `${API_BASE_URL}${urlRelativa}`;
@@ -132,21 +160,17 @@
     const solicitar = async () => {
         const result = await alertas.alertQuestion('¿Completar pedido?');
         if (result.isConfirmed) {
-            // const typeSend = await alertas.questionTypeSend();
-            // sendMessage();
-            // location.reload(true);
             const data = cartStore.items;
             $.each(data, function (index, value) {
-
                 agregarPedido(value, cartStore.expiracion.id_temp).then(
                     (response) => {
                          if (response.error) {
                         alertas.alertError(response.error);
                     } else {
                         sendMessage(response.code);
-                        cartStore.$reset();
-                        localStorage.removeItem('miCarrito');
-                        location.reload(true);
+                        $('#temp_offcanvas').fadeOut();
+                        $('#temporizador').fadeOut();
+                        cartStore.detenerTemporizador();
                     }
                     }
                 );
@@ -156,7 +180,7 @@
 
     }
 
-    const temp_offcanvas = defineModel('temp_offcanvas')
+    const temp_offcanvas = ref('')
     watch(() => cartStore.segundos, (seg) => {
         temp_offcanvas.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
     })

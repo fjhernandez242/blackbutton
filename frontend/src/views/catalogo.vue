@@ -90,7 +90,7 @@
     // Variable para almacenar productos
     const catalogo = ref([]);
     const cartStore = useCartStore();
-    const temporizador = defineModel('temporizador');
+    const temporizador = ref('');
     // Agrega a carrito
     const addTopCart = (params) => {
         const idSearch = params.tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
@@ -100,6 +100,7 @@
             return false;
         }
         if (params.tipo_entrega == 1) {
+            $('#'+ idSearch + params.id).val('1');
             ctrlInventario(params, cantidad);
         } else {
             $('#'+ idSearch + params.id).val('');
@@ -115,33 +116,52 @@
         if (response.error) {
             alertas.alertError(response.error);
         }
-        let param_apartado = {}
         // Si ya existe un codigo de temporal para el usuario se agrega
-        if (cartStore.expiracion.id_temp) {
-            param_apartado = {
-                "id_prod": params.id,
-                "cantidad": cantidad,
-                "codigo_temp": cartStore.expiracion.id_temp || null
-            }
-        } else {
-            param_apartado = {
-                "id_prod": params.id,
-                "cantidad": cantidad,
-                "codigo_temp": ""
-            }
+        let param_apartado = {
+            "id_prod": params.id,
+            "cantidad": cantidad,
+            "codigo_temp": ""
         }
+        if (cartStore.expiracion.id_temp != '') {
+            param_apartado.codigo_temp = cartStore.expiracion.id_temp || null;
+        }
+
         const apartado = await apartarProducto(param_apartado);
         if (apartado.error) {
             alertas.alertError(response.error);
         } else {
             // Guarda el codigo temporal y la fecha de expración
-            $('#temporizador').show();
-            $('#temp_offcanvas').show();
-            cartStore.setTemp(apartado.cod_tem, apartado.time_expired);
-            // Actualiza los productos en web
+            if (!cartStore.expiracion.id_temp) {
+                cartStore.setTemp(apartado.cod_tem, apartado.time_expired);
+                $('#temporizador').show();
+                $('#temp_offcanvas').show();
+            }
         }
         listarProductos({'cambioTipo': 0});
     };
+    const currentTipo = computed(() => cartStore.tipoEntrega);
+
+    watch(() => cartStore.tipoEntrega, (params) => {
+        listarProductos(params);
+    })
+    watch(() => cartStore.segundos, (seg) => {
+        temporizador.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
+        if (cartStore.minutos == 0 && seg == 0) {
+            $('#temporizador').fadeOut();
+            $('#temp_offcanvas').fadeOut();
+            devolver();
+        }
+
+    })
+    // Retorna de producto
+    const devolver = async () => {
+        const response = await setterProducto({
+            "codigo_temp": cartStore.expiracion.id_temp
+        });
+        if (response.error) {
+            alertas.alertError(response.error);
+        }
+    }
     const listarProductos = async (params) => {
         getProductos(params).then(
             (data) => {
@@ -161,28 +181,13 @@
     onMounted(() => {
         // Recarga de catalogo
         listarProductos({'cambioTipo': 0});
+        cartStore.iniciarTemporizador();
+        if (cartStore.expiracion.id_temp) {
+            $('#temporizador').show();
+            $('#temp_offcanvas').show();
+        }
+
     });
-    const currentTipo = computed(() => cartStore.tipoEntrega);
-
-    watch(() => cartStore.tipoEntrega, (params) => {
-        listarProductos(params);
-    })
-    watch(() => cartStore.segundos, (seg) => {
-        temporizador.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
-        if (cartStore.minutos == 0 && seg == 0) {
-            devolver();
-        }
-
-    })
-    // Retorna de producto
-    const devolver = async () => {
-        const response = await setterProducto({
-            "codigo_temp": cartStore.expiracion.id_temp
-        });
-        if (response.error) {
-            alertas.alertError(response.error);
-        }
-    }
     // obtenemos el id del producto
     const selecProducto = (id) => {
         idProducto.value = id;
@@ -304,13 +309,17 @@
         display: none;
         position: fixed;
         right: 0;
+        top: 8rem;
         margin: 1rem;
         z-index: 1;
         box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 
     #temporizador .card-body {
+        font-size: 28px;
         font-weight: bold;
+        padding-top: 2px;
+        padding-bottom: 2px;
     }
 
     /** media */

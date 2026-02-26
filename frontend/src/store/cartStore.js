@@ -17,8 +17,9 @@ export const useCartStore = defineStore('cart', {
             tipoEntrega: parsed?.tipoEntrega || { "cambioTipo": 0 },
             // Si 'parsed' tiene 'expiracion', la usa; si no, valores por defecto
             expiracion: parsed?.expiracion || { 'id_temp': "", "time_expira": "" },
-            minutos: parsed?.minutos || 2,
-            segundos: parsed?.segundos || 59,
+            minutos: parsed?.minutos || 15,
+            segundos: parsed?.segundos || 60,
+            intervalo: parsed?.intervalo || null,
         }
     },
 
@@ -33,8 +34,9 @@ export const useCartStore = defineStore('cart', {
                 items: this.items,
                 expiracion: this.expiracion,
                 tipoEntrega: this.tipoEntrega,
-                minutos: this.minutos,
-                segundos: this.segundos
+                // minutos: this.minutos,
+                // segundos: this.segundos,
+                intervalo: this.intervalo
             };
             localStorage.setItem('miCarrito', JSON.stringify(dataSave));
         },
@@ -79,24 +81,32 @@ export const useCartStore = defineStore('cart', {
             this.saveToLocalStorage();
 
         },
+        detenerTemporizador() {
+            if (this.intervalo) {
+                clearInterval(this.intervalo);
+                this.intervalo = null; // Limpiamos la referencia
+            }
+            this.$reset();
+            localStorage.removeItem('miCarrito');
+            setTimeout(() => location.reload(), 1000);
+        },
         // Dentro de actions en cartStore.js
         iniciarTemporizador() {
 
             // Evitar múltiples intervalos si se llama a la función varias veces
-            if (this.intervalo) clearInterval(this.intervalo);
+            if (this.intervalo) {
+                clearInterval(this.intervalo);
+            }
 
             this.intervalo = setInterval(() => {
-
                 if (this.expiracion.time_expira) {
                     const ahora = new Date();
                     const fechaExpira = new Date(this.expiracion.time_expira);
 
                     if (ahora > fechaExpira) {
                         // TIEMPO AGOTADO
-                        clearInterval(this.intervalo);
-                        this.$reset();
-                        localStorage.removeItem('miCarrito');
-                        alertas.alertWarning("¡Tiempo agotado! Los muñecos han vuelto al taller.", false);
+                        this.detenerTemporizador();
+                        alertas.alertWarning("¡Tiempo agotado!", false);
                         setTimeout(() => location.reload(), 1000);
                     } else {
                         // CALCULAR TIEMPO RESTANTE REAL
@@ -115,6 +125,10 @@ export const useCartStore = defineStore('cart', {
                     }
                 }
             }, 1000);
+        },
+        resetStore() {
+            this.$reset();
+            localStorage.removeItem('miCarrito');
         }
     },
 
