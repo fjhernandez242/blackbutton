@@ -16,8 +16,8 @@ Entorno producción
 
 El proyecto esta desplegado en un servidor VPS utilizando:
 
-    Web Server: Ngix.
-    Aplication Server: Gunicorn
-    SSL
+* Web Server: Ngix.
+* Aplication Server: Gunicorn
+* SSL
 
 ![Catálogo](https://github.com/fjhernandez242/blackbutton/blob/main/BlackButton.png)
