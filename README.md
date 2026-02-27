@@ -20,3 +20,4 @@ El proyecto esta desplegado en un servidor VPS utilizando:
     Aplication Server: Gunicorn
     SSL
 
+![Catálogo](https://github.com/fjhernandez242/blackbutton/blob/main/BlackButton.png)
