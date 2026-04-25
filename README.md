@@ -10,4 +10,14 @@ código de pedido y enviando junto con toda la información de los productos uti
 la api de whatsapp para que el usuario pueda comunicarse con la creadora de los
 productos.
 
+🚀 Demo en Vivo
 
+[Visitar aplicación](https://blackbuttondev.fjdev.icu/)
+
+El proyecto esta desplegado en un servidor VPS utilizando:
+
+* Web Server: Ngix.
+* Aplication Server: Gunicorn
+* SSL
+
+![Catálogo](https://github.com/fjhernandez242/blackbutton/blob/main/BlackButton.png)
