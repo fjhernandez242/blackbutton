@@ -170,18 +170,21 @@ def setterProduto(request):
         # Se obtiene la resta de productos
         nueva_cantidad = producto.inventario - int(data['cantidad'])
         try:
+            # Al terminar con el stock disponible, el prouducto pasará a tipo de entrega "Sobre pedido"
             if nueva_cantidad == 0:
                 producto.inventario = nueva_cantidad
-                producto.estado = 'R'
+                producto.tipo_entrega = 2
             else:
                 producto.inventario = nueva_cantidad
             producto.save()
         except:
             return Response({"error": "No se pudo cambiar estado del producto"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
+        # Busca el apartado relacionado al codigo temporal
         apartados = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
         if not apartados.exists():
             return Response({"error": "No se encontró el apartado"}, status=status.HTTP_400_BAD_REQUEST)
+        # Revisa que no se haya completado el pedido aún
         existe_pedido = pedidos_model.objects.filter(codigo_temp=data['codigo_temp'])
         if not existe_pedido.exists():
             for apartado in apartados:
@@ -192,10 +195,6 @@ def setterProduto(request):
                     suma = 1
                 nueva_cantidad = catalogo.inventario + suma
                 try:
-                    # Actualiza catalogo
-                    catalogo.inventario = nueva_cantidad
-                    catalogo.estado = 'D'
-                    catalogo.save()
                     # Actualiza apartado
                     if not data.get('id_prod'):
                         apartado.delete()
@@ -207,6 +206,16 @@ def setterProduto(request):
                             else:
                                 apartado.cantidad_prod = apartado.cantidad_prod - 1
                                 apartado.save()
+                    # Actualiza catalogo
+                    # Revisa el tipo de entrega
+                    if catalogo.tipo_entrega == 2:
+                        # Valida si aún productos en apartados
+                        existe_ref_apartado = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
+                        if not existe_ref_apartado.exists():
+                            # Si ya no hay apartados, y estos son regresados, se actualiza el tipo de entrega
+                            catalogo.tipo_entrega = 1
+                    catalogo.inventario = nueva_cantidad
+                    catalogo.save()
                 except:
                     return Response({"error": "No fue posible actualiar el producto"}, status=status.HTTP_400_BAD_REQUEST)
             try:
@@ -239,7 +248,7 @@ def apartados(request):
     try:
         if not actualizar:
             # Agrega nuevo registro
-            timeexpired = timezone.now() + timedelta(minutes=15)
+            timeexpired = timezone.now() + timedelta(minutes=15) # Se asigna tiempo del temporizador en minutos
             cookietem_header_model.objects.create(
                 codigo_temp = codigo,
                 fecha_expiracion = timeexpired,
