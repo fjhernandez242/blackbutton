@@ -14,15 +14,21 @@
     </head>
 
     <body>
-        <div class="spinner-grow text-dark" style="width: 5rem; height: 5rem;" role="status"></div>
+        <div v-if="cargando" class="overlay-spinner">
+            <div class="spinner-grow text-dark" style="width: 5rem; height: 5rem;" role="status"></div>
+        </div>
         <div id="app"></div>
         <!-- jQuery v3.7.1 -->
-        <script src="/jQuery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <!-- Popper v2.9.2 -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
         <script type="module" src="/src/main.js"></script>
+
     </body>
     <script>
         $(document).ready(function () {
-            $('.spinner-grow').hide();
+            $('.overlay-spinner').hide();
         });
     </script>
 
@@ -47,9 +53,19 @@
         /* Puedes usar los pesos que importaste */
     }
 
-    .spinner-grow {
-        position: absolute;
-        top: 45%;
-        left: 50%;
+    .overlay-spinner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+
+        background-color: rgb(0, 0, 0, 0.5);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        z-index: 9999;
     }
 </style>

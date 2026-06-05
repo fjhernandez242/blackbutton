@@ -114,7 +114,7 @@
                 v_dimensiones.value = prod.dimensiones;
                 v_disponible.value = prod.tipo_entrega == 1 ? 'Inmediata' : 'Sobre pedido';
                 v_inventario.value = prod.inventario;
-                v_comentario.value = prod.comentario;
+                v_comentario.value = prod.comentario !== 'undefined' ? prod.comentario : '';
 
             } else {
                 // Modo agregar: limpiar o preparar el formulario

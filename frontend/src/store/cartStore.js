@@ -18,24 +18,24 @@ export const useCartStore = defineStore('cart', {
             // Si 'parsed' tiene 'expiracion', la usa; si no, valores por defecto
             expiracion: parsed?.expiracion || { 'id_temp': "", "time_expira": "" },
             minutos: parsed?.minutos || 15,
-            segundos: parsed?.segundos || 60,
+            segundos: parsed?.segundos || 0,
             intervalo: parsed?.intervalo || null,
+            recarga: parsed?.recarga || 0,
         }
     },
 
-    // Los 'actions' son las funciones que modifican el estado (añadir, quitar, etc.)
     actions: {
         /**
          * Agrega un producto al carrito. Si ya existe, incrementa la cantidad.
-         * @param {Object} product - El producto a añadir (debe tener id, nombre, precio, etc.)
+         * @param {Object} product
          */
         saveToLocalStorage() {
             const dataSave = {
                 items: this.items,
                 expiracion: this.expiracion,
                 tipoEntrega: this.tipoEntrega,
-                // minutos: this.minutos,
-                // segundos: this.segundos,
+                minutos: this.minutos,
+                segundos: this.segundos,
                 intervalo: this.intervalo
             };
             localStorage.setItem('miCarrito', JSON.stringify(dataSave));
@@ -44,7 +44,7 @@ export const useCartStore = defineStore('cart', {
         addItem(product, cantidad) {
 
             const notify = useNotificationStore();
-            const existingItem = this.items.find(item => item.id === product.id);
+            const existingItem = this.items.find(item => item.id === product.id && item.tipo_entrega === product.tipo_entrega);
 
             if (existingItem) {
                 // Si el producto ya existe, solo aumentamos la cantidad
@@ -56,16 +56,18 @@ export const useCartStore = defineStore('cart', {
                     quantity: parseInt(cantidad),
                 });
             }
-            notify.lanzarAlerta(`Se añadio ${product.producto} al carrito`);
             this.saveToLocalStorage();
+            notify.lanzarAlerta(`Se añadio ${product.producto} al carrito`);
         },
-        deleteItem(id) {
-            const listadoItems = this.items.filter(item => item.id === id);
+        deleteItem(id, tipo_entrega) {
 
-            if (listadoItems[0].quantity > 1) {
-                listadoItems[0].quantity--;
+            const listadoItems = this.items.find(item => item.id == id && item.tipo_entrega == tipo_entrega);
+
+            if (listadoItems.quantity > 1) {
+                listadoItems.quantity--;
             } else {
-                this.items = this.items.filter(item => item.id !== id);
+                // Indica que dejo todo los elementos que sean diferentes al que se desea eliminar del carrito
+                this.items = this.items.filter(item => (item.id != id));
             }
 
             this.saveToLocalStorage();
@@ -81,62 +83,71 @@ export const useCartStore = defineStore('cart', {
             this.saveToLocalStorage();
 
         },
-        detenerTemporizador() {
-            if (this.intervalo) {
-                clearInterval(this.intervalo);
-                this.intervalo = null; // Limpiamos la referencia
+        detenerTemporizador(restantes = false, finalizado = false) {
+            // if (this.intervalo) {
+            // }
+            // clearInterval(this.intervalo);
+            // this.intervalo = null; // Limpiamos la referencia
+            if (!finalizado) {
+                this.items = this.items.filter(item => (item.tipo_entrega !== 1));
+            } else {
+                this.items = [];
             }
-            this.$reset();
-            localStorage.removeItem('miCarrito');
-            setTimeout(() => location.reload(), 1000);
+
+            this.expiracion.id_temp = '';
+            this.expiracion.time_expira = '';
+            this.tipoEntrega.cambioTipo = 0;
+            this.minutos = 15;
+            this.segundos = 0;
+            this.saveToLocalStorage();
+            if (!restantes || finalizado) {
+                this.$reset();
+                localStorage.removeItem('miCarrito');
+            }
+            // setTimeout(() => location.reload(), 1000);
         },
         // Dentro de actions en cartStore.js
         iniciarTemporizador() {
-
             // Evitar múltiples intervalos si se llama a la función varias veces
             if (this.intervalo) {
                 clearInterval(this.intervalo);
             }
 
             this.intervalo = setInterval(() => {
+                // console.log('entra');
+                // console.log(this.expiracion.time_expira);
+
                 if (this.expiracion.time_expira) {
                     const ahora = new Date();
                     const fechaExpira = new Date(this.expiracion.time_expira);
 
                     if (ahora > fechaExpira) {
-                        // TIEMPO AGOTADO
-                        this.detenerTemporizador();
-                        alertas.alertWarning("¡Tiempo agotado!", false);
+                        let restantes = false;
+                        if ((this.items).length > 0) {
+                            restantes = true;
+                        }
+                        // Tiempo agotado
+                        this.detenerTemporizador(restantes);
+                        alertas.alertWarning("¡Tiempo agotado!\nLos amigurumis de entrega inmediada\nSaldrán de tu carrito", false);
                         setTimeout(() => location.reload(), 1000);
                     } else {
-                        // CALCULAR TIEMPO RESTANTE REAL
+                        // Calcular tiempo real
                         const diferenciaMs = fechaExpira - ahora;
-
-                        // Convertimos la diferencia real en minutos y segundos
-                        // Esto es mucho más seguro que restar manualmente
                         this.minutos = Math.floor((diferenciaMs / 1000 / 60) % 60);
                         this.segundos = Math.floor((diferenciaMs / 1000) % 60);
-
-                        // Formateo visual opcional en consola
-                        // console.log(`${this.minutos}:${this.segundos < 10 ? '0' : ''}${this.segundos}`);
-
-                        // NOTA: No recomiendo saveToLocalStorage aquí cada segundo.
-                        // El tiempo ya está seguro en "time_expira" dentro del storage.
                     }
                 }
             }, 1000);
         },
-        resetStore() {
-            this.$reset();
-            localStorage.removeItem('miCarrito');
+        recargaCatalogo() {
+            let cambio = this.recarga == 0 ? 1 : 0;
+            this.recarga = cambio;
         }
     },
 
-    // Los 'getters' son como propiedades computadas para el store (para leer información)
     getters: {
         /**
          * Devuelve el número total de productos en el carrito.
-         * Esto es lo que usarás para el contador en tu header.
          */
         totalItemsCount: (state) => {
             // Usamos .reduce para sumar la propiedad 'quantity' de todos los items

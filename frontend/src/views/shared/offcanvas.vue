@@ -1,25 +1,40 @@
 <template>
     <!-- Zona de carro para compras -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-        <div class="msgInfo" id="msgEnvio">
-            <h4><b>¿Cómo te llega tu producto?</b></h4>
-            <small>
-                Se hace envios a toda la Republica Méxicana, el envio se realiza por
-                medio de Correos de México.
-            </small>
-        </div>
-        <div class="msgInfo" id="msgEncargo">
-            <h4><b>¿Cómo finalizo mi pago?</b></h4>
-            <small>
-                El proceso final se realizar con ayuda de WhatsApp, al presionar el botón <b>Completar pedido</b> se te
-                redirigirá a WhatsApp para que puedas completar tu pedido.
-            </small>
-        </div>
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasRightLabel"><b>Mi carrito</b></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
+            <!-- información -->
+             <div id="info" v-if="cartStore.totalItemsCount != 0">
+                 <p class="d-flex">
+                     <!-- Botón para información de envio de producto -->
+                     <button class="btn collapseBtnInfo" type="button" data-bs-toggle="collapse" data-bs-target="#infoEnvio"
+                         aria-expanded="false" aria-controls="infoEnvio">
+                         <b>¿Cómo llega mi producto?</b>
+                     </button>
+                     <!-- Botón para información de forma de pago -->
+                     <button class="btn collapseBtnInfo" type="button" data-bs-toggle="collapse" data-bs-target="#infoPago"
+                         aria-expanded="false" aria-controls="infoPago">
+                         <b>¿Cómo finalizo mi pedido?</b>
+                     </button>
+                 </p>
+                 <!-- información para envio de productos-->
+                 <div class="collapse" id="infoEnvio">
+                     <div class="card card-body mb-2">
+                         Se hace envios a toda la Republica Méxicana, el envio se realiza por
+                         medio de Correos de México.
+                     </div>
+                 </div>
+                 <!-- Información para forma de pago -->
+                 <div class="collapse" id="infoPago">
+                     <div class="card card-body">
+                         El proceso final se realizar con ayuda de WhatsApp, al presionar el botón <b>Completar pedido</b> se te
+                         redirigirá a WhatsApp para que puedas completar tu pedido.
+                     </div>
+                 </div>
+             </div>
             <div class="card" id="temp_offcanvas">
                 <div class="card-body">
                     <small><b>Tiempo de apartado:</b> {{ temp_offcanvas }}</small>
@@ -29,46 +44,48 @@
                 <span>No hay amigurumis seleccionados </span>
                 <i class="bi bi-emoji-frown"></i>
             </div>
-            <div class="row">
-                <div v-for="producto in productos" class="col-12 col-sm-12 mb-2 d-flex justify-content-center">
-                    <div class="card" id="cardCarrito">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-10">
-                                    <div class="d-flex">
+            <div v-for="producto in productos" class="col-12 col-sm-12 mb-2 d-flex justify-content-center">
+                <div class="card h-100" id="cardCarrito">
+                    <div class="card-body">
+                        <div class="row justify-content-end align-content-end">
+                            <div class="col-2 d-flex justify-content-end">
+                                <span v-if="producto.quantity > 1"
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ producto.quantity }}
+                                    <span class="visually-hidden">Productos en carrito</span>
+                                </span>
+                            </div>
+                            <button type="button" class="btn-close translate-middle" @click="deleteProduct(producto.id, producto.tipo_entrega)" aria-label="Close"></button>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="container-img">
                                     <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
-                                    class="img-fluid" id="img_ref_carrito">
-                                    <ul class="list-unstyled text-center">
-                                        <li>
-                                            <span>{{ producto.producto }}</span>
-                                        </li>
-                                        <li>
-                                            <span>
-                                                <b><i class="bi bi-currency-dollar"></i> {{ producto.precio }}</b>
-                                            </span>
-                                        </li>
-                                        <li>
-                                            <small>
-                                                <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
-                                            </small>
-                                        </li>
-                                    </ul>
-                                </div>
-                                </div>
-                                <div class="col-2 d-flex justify-content-end">
-                                    <span v-if="producto.quantity > 1"
-                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ producto.quantity }}
-                                        <span class="visually-hidden">Productos en carrito</span>
-                                    </span>
-                                    <button type="button" class="btn-close" @click="deleteProduct(producto.id, producto.tipo_entrega)" aria-label="Close"></button>
+                                    class="img-fluid img_ref_carrito">
                                 </div>
                             </div>
+                            <div class="col-8">
+                                <ul class="list-unstyled text-left">
+                                    <li>
+                                        <span>{{ producto.producto }}</span>
+                                    </li>
+                                    <li>
+                                        <span>
+                                            <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <small>
+                                            <i class="bi bi-rulers pe-1"></i>{{ producto.dimensiones }} cm
+                                        </small>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="card-footer badge bg-warning text-dark" style="font-size: 13px;">
-                            <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
-                            <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
-                        </div>
+                    </div>
+                    <div class="card-footer badge bg-warning text-dark" style="font-size: 13px;">
+                        <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
+                        <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
                     </div>
                 </div>
             </div>
@@ -118,21 +135,29 @@
     const emit = defineEmits(['carga_lista']);
     const deleteProduct = (id, tipo_entrega) => {
         // Elimina el producto del carrito
-        cartStore.deleteItem(id);
+        cartStore.deleteItem(id, tipo_entrega);
         if (tipo_entrega == 1) {
             let vaciado = {};
-            if (cartStore.totalItemsCount === 0) {
-                vaciado.tipo = 'total';
-            } else {
+            vaciado.tipo = 'total';
+            vaciado.restantes = false
+            $.each(cartStore.items, (key, element) => {
+                if (element.tipo_entrega == '1') {
+                    vaciado.id_prod = id;
+                    vaciado.tipo = 'parcial';
+                    return false;
+                }
+            });
+            if (vaciado.tipo == 'total' && (cartStore.items).length > 0) {
                 vaciado.id_prod = id;
                 vaciado.tipo = 'parcial';
+                vaciado.restantes = true
             }
             devolver(vaciado);
         }
         // Carga de nuevo los items en el Canvas
         emit('carga_lista');
     }
-    // Saca el producto del carrito de producto
+    // Saca el producto del carrito
     const devolver = async (vaciado) => {
         let params = {
             "codigo_temp": cartStore.expiracion.id_temp
@@ -144,10 +169,10 @@
         if (response.error) {
             alertas.alertError(response.error);
         }
-        if (vaciado.tipo == 'total') {
+        if (vaciado.tipo == 'total' || vaciado.restantes) {
             $('#temp_offcanvas').fadeOut();
             $('#temporizador').fadeOut();
-            cartStore.detenerTemporizador();
+            cartStore.detenerTemporizador(vaciado.restantes);
         }
         emit('carga_lista');
     }
@@ -161,20 +186,28 @@
         const result = await alertas.alertQuestion('¿Completar pedido?');
         if (result.isConfirmed) {
             const data = cartStore.items;
-            $.each(data, function (index, value) {
-                agregarPedido(value, cartStore.expiracion.id_temp).then(
-                    (response) => {
-                         if (response.error) {
+            let codePedido = '';
+            for(const value of data) {
+                value.pedido = codePedido;
+                try {
+                    const response = await agregarPedido(value, cartStore.expiracion.id_temp);
+                    if (response.error) {
                         alertas.alertError(response.error);
+                        break;
                     } else {
+                        codePedido = response.code;
                         sendMessage(response.code);
                         $('#temp_offcanvas').fadeOut();
                         $('#temporizador').fadeOut();
-                        cartStore.detenerTemporizador();
+                        cartStore.detenerTemporizador(false, true);
+                        cartStore.recargaCatalogo();
+                        setTimeout(() => location.reload(), 1000);
                     }
-                    }
-                );
-            });
+                } catch (err) {
+                    console.error("Error en la petición: ", err);
+                    break;
+                }
+            };
             return false;
         }
 
@@ -187,6 +220,13 @@
 </script>
 
 <style scoped>
+    .collapseBtnInfo {
+        padding: 1px;
+        margin-inline: 3px;
+        background-color: aliceblue;
+        box-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
     .msgInfo {
         position: absolute;
         background-color: rgb(238, 247, 255);
@@ -207,14 +247,24 @@
 
     #cardCarrito {
         border: none;
-        max-width: 90%;
+        width: 90%;
         box-shadow: 0 7px 15px rgb(181, 52, 113);
     }
 
-    #img_ref_carrito {
-        max-width: 27%;
-        margin-inline: 2%;
+    .container-img {
+        width: 100%;
+        max-width: 250px;
+        height: 100px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .img_ref_carrito {
+        width: 100%;
+        height: 100%;
         border-radius: 10px;
+        object-fit: cover;
+        object-position: center;
     }
 
     #btn_pedido {

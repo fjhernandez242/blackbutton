@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from .serializers import UserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -12,17 +12,32 @@ from django.contrib.auth.models import User
 
 @api_view(['POST'])
 def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
 
-    user = get_object_or_404(User, username=request.data['username'])
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            # Se elimina el token anterior
+            Token.objects.filter(user=user).delete()
+            # Se crea un nuevo token
+            token = Token.objects.create(user=user)
+            return Response({ "token": token.key, 'user': user.username }, status=status.HTTP_200_OK)
+        else:
+            return Response({ "error": "Cuenta desactivada" }, status=status.HTTP_200_OK)
 
-    if not user.check_password(request.data['password']):
-        return Response({"error": "Contraseña incorrecta"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"error": "Usuario o contraseña invalidos"}, status=status.HTTP_200_OK)
 
-    token, created = Token.objects.get_or_create(user=user)
-
-    serializer = UserSerializer(instance=user)
-
-    return Response({ "token": token.key, "user": serializer.data }, status=status.HTTP_200_OK)
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    try:
+        # Token.objects.filter(user=data['user']).delete()
+        request.user.auth_token.delete()
+        return Response({ 'correcto': 'Token eliminado'}, status=status.HTTP_200_OK)
+    except:
+        return Response({ 'error': 'No se pudo cerrar sesión'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])

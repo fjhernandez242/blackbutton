@@ -12,7 +12,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .forms import CatalogoForm
-from django.db.models import Q
+from django.db.models import Q, F, Count
 
 @api_view(['POST'])
 # @authentication_classes([TokenAuthentication])
@@ -117,6 +117,86 @@ def eliminar_producto(request):
     return Response({ "success": "Producto borrado" }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getPedidoByClave(request):
+    data = request.data
+    # Validamos que exista el pedido
+    get_pedido = pedidos_model.objects.filter(codigo_venta=data['cve'], estado=1)
+    if not get_pedido.exists():
+        return Response({"info": "No se encontró el pedido"}, status=status.HTTP_200_OK)
+    # Se recorre cada pedido
+    recopilado = []
+    for pedido in get_pedido:
+        producto = catalogo_model.objects.filter(id=pedido.id_producto).first()
+        if producto is not None:
+            url_imagen = None
+            if producto.imagen:
+                url_imagen = request.build_absolute_uri(producto.imagen.url)
+
+            recopilado.append({
+                'nombre': producto.producto,
+                'precio': float(producto.precio),
+                'tipo_entrega': producto.tipo_entrega,
+                'estado': producto.estado,
+                'imagen': url_imagen,
+                'cantidad': pedido.cantidad_vendida,
+                'codigo_temp': pedido.codigo_temp,
+                'estado_pedido': pedido.estado,
+                'fecha_pedido': pedido.fecha_venta.strftime('%d/%m/%Y %H:%M')
+            })
+    return Response({ "pedido": recopilado }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def cambioEstadoVenta(request):
+    data = request.data
+    exist_pedido = pedidos_model.objects.filter(codigo_venta=data['cve'])
+    if not exist_pedido.exists():
+        return Response({'error': 'No se encontró el pedido'}, status=status.HTTP_404_NOT_FOUND)
+    try:
+        # Cambia a estado Completado todos los registros con el codigo de venta indicado
+        if data['estado'] == 'completar':
+            estadoNumero = 2
+        else:
+            estadoNumero = 3
+        exist_pedido.update(estado=estadoNumero)
+    except:
+        return Response({'error': 'No se pudo completar la venta'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'Correcto': 'Estado cambiado'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def calculoMovimientos(request):
+    data = request.data
+    # Buscamos todos las ventas completadas
+    existen_registros = pedidos_model.objects.exists()
+    if not existen_registros:
+        return Response({
+        'ventas_proceso': 0,
+        'ventas_completas': 0,
+        'ventas_canceladas': 0
+    })
+
+    estadisticas_ventas = pedidos_model.objects.aggregate(
+        # Cuenta los 'codigo_venta' unicos donde el estado es 1
+        proceso = Count('codigo_venta',filter=Q(estado=1),distinct=True),
+        # Cuenta los 'codigo_venta' unicos donde el estado es 2
+        completas = Count('codigo_venta',filter=Q(estado=2),distinct=True),
+        # Cuenta los 'codigo_venta' unicos donde el estado es 3
+        canceladas = Count('codigo_venta',filter=Q(estado=3),distinct=True)
+    )
+
+    return Response({
+        'ventas_proceso': estadisticas_ventas['proceso'],
+        'ventas_completas': estadisticas_ventas['completas'],
+        'ventas_canceladas': estadisticas_ventas['canceladas']
+    })
+
+@api_view(['POST'])
 # @authentication_classes([TokenAuthentication])
 # @permission_classes([IsAuthenticated])
 def getProductoById(request):
@@ -137,8 +217,13 @@ def agregar_pedido(request):
     existe_producto = catalogo_model.objects.get(id=data['id'])
     if not existe_producto:
         return Response({"error", "No se encontró el producto" }, status=status.HTTP_404_NOT_FOUND)
-    # Se crea el código de venta
-    code_pedido = genera_codigo_venta()
+    # Revisa que no venga un codigo de pedido
+    if data['pedido'] == '':
+        # Se crea el código de venta si no viene uno
+        code_pedido = genera_codigo_venta()
+    else:
+        # Se agrega el código de venta si viene
+        code_pedido = data['pedido']
     # | MÉTODO DE SEGURIDAD | Si no es posible generar el código, termina el proceso
     if not code_pedido:
         return Response({"error", "No fue posible agregar el pedido"}, status=status.HTTP_400_BAD_REQUEST)
@@ -157,7 +242,7 @@ def agregar_pedido(request):
     return Response({ "success": "Pedido cargado", "code": code_pedido }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-def setterProduto(request):
+def setterProducto(request):
     data = request.data
 
     if not data.get('codigo_temp'):

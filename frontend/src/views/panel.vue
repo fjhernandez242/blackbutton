@@ -1,24 +1,134 @@
 <template>
+    <transition>
     <section>
         <div class="container">
+            <div class="row d-flex align-items-end">
+                <div class="col-lg-6">
+                    <p @click="cerradoDeSesion()" style="cursor: pointer;">Cerrar sesión</p>
+                </div>
+            </div>
+            <h4><b>Indicadores</b></h4>
+            <div class="row">
+                    <div class="col-lg-4 position-relative">
+                        <div class="translate-middle-y" id="icon-cash">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+                            <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
+                            </svg>
+                        </div>
+                        <div class="card" id="ventasCompletas">
+                            <div class="card-header ps-5 bg-transparent border-0">
+                                <small class="text-muted fw-bold">Ventas en proceso</small>
+                            </div>
+                            <div class="card-body ps-5">
+                                <p class="mb-0" style="font-size: 20px;">{{ conteoVentas.ventas_proceso }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 position-relative">
+                        <div class="translate-middle-y" id="icon-top">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cash-coin" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8m5-4a5 5 0 1 1-10 0 5 5 0 0 1 10 0"/>
+                            <path d="M9.438 11.944c.047.596.518 1.06 1.363 1.116v.44h.375v-.443c.875-.061 1.386-.529 1.386-1.207 0-.618-.39-.936-1.09-1.1l-.296-.07v-1.2c.376.043.614.248.671.532h.658c-.047-.575-.54-1.024-1.329-1.073V8.5h-.375v.45c-.747.073-1.255.522-1.255 1.158 0 .562.378.92 1.007 1.066l.248.061v1.272c-.384-.058-.639-.27-.696-.563h-.668zm1.36-1.354c-.369-.085-.569-.26-.569-.522 0-.294.216-.514.572-.578v1.1zm.432.746c.449.104.655.272.655.569 0 .339-.257.571-.709.614v-1.195z"/>
+                            <path d="M1 0a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4.083q.088-.517.258-1H3a2 2 0 0 0-2-2V3a2 2 0 0 0 2-2h10a2 2 0 0 0 2 2v3.528c.38.34.717.728 1 1.154V1a1 1 0 0 0-1-1z"/>
+                            <path d="M9.998 5.083 10 5a2 2 0 1 0-3.132 1.65 6 6 0 0 1 3.13-1.567"/>
+                            </svg>
+                        </div>
+                        <div class="card" id="ventasCompletas">
+                            <div class="card-header ps-5 bg-transparent border-0">
+                                <small class="text-muted fw-bold">Ventas completadas</small>
+                            </div>
+                            <div class="card-body ps-5">
+                                <p class="mb-0" style="font-size: 20px;">{{ conteoVentas.ventas_completas }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 position-relative">
+                        <div class="translate-middle-y" id="icon-cancel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
+                        </div>
+                        <div class="card" id="ventasCompletas">
+                            <div class="card-header ps-5 bg-transparent border-0">
+                                <small class="text-muted fw-bold">Ventas canceladas</small>
+                            </div>
+                            <div class="card-body ps-5">
+                                <p class="mb-0" style="font-size: 20px;">{{ conteoVentas.ventas_canceladas }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <p class="line"></p>
             <h4><b>Buscar pedido</b></h4>
             <div class="card w-60">
                 <div class="card-body">
-                     <form class="row g-3 needs-validation" novalidate>
-                        <div class="col-md-4">
-                            <label for="cve_pedido" class="form-label">Clave de pedido</label>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control limpiarCampo" name="cve_pedido" id="cve_pedido"
-                                    v-model="v_producto" placeholder="ingresa la clave depedido" required>
+                    <div class="col-lg-6 col-md-10 col-sm-12 d-flex align-content-center">
+                        <form @submit.prevent="rastrearProducto" class="row g-3 needs-validation" novalidate>
+                            <div class="col-lg-7 col-md-6 col-sm-10">
+                                <label for="cve_busqueda" class="form-label">Clave de pedido</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control limpiarCampo" name="cve_busqueda" id="cve_busqueda"
+                                        v-model="v_cve_busqueda" placeholder="Clave depedido" required>
+                                </div>
+                            </div>
+                            <div class="col-lg-5 col-md-6 col-sm-2 btn-group d-flex justify-content-center align-items-center">
+                                <button type="submit" class="btn mt-3">
+                                    Rastrear
+                                </button>
+                                <button type="button" @click="limpiarCampo('tabla')" class="btn mt-3">
+                                    Limpiar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div v-if="prod_reastreado != ''" >
+                        <div class="row">
+                            <div class="col">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-start">Productos</th>
+                                                <th scope="col" class="text-start">Tipo de entrega</th>
+                                                <th scope="col" class="text-start">Fecha de pedido</th>
+                                                <th scope="col" class="text-end">Precio(c/u)</th>
+                                                <th scope="col" class="text-end">Cantidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="prod in prod_reastreado">
+                                                <td scope="row" >{{ prod.nombre }}</td>
+                                                <td class="text-start" v-if="prod.tipo_entrega == 2">Sobre Pedido</td>
+                                                <td class="text-start" v-else>Entrega Inmediata</td>
+                                                <td class="text-start" >{{ prod.fecha_pedido }}</td>
+                                                <td class="text-end" >{{ formatearMoneda(prod.precio) }}</td>
+                                                <td class="text-end" >{{ prod.cantidad }}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr id="fTotales">
+                                                <td>Total</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td class="text-end">{{ formatearMoneda(sumaProdCantidad.totalCosto) }}</td>
+                                                <td class="text-end">{{ sumaProdCantidad.totalCantidad }}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div class="col-md-4 d-flex btn-group">
+                                    <button type="button" class="btn" @:click="cambiarEstadoPedido('completar')" :disabled="completado">
+                                        {{ completado ? 'Procesando...' : textoCompl }}
+                                    </button>
+                                    <button type="button" class="btn ps-3" @:click="cambiarEstadoPedido('cancelar')" :disabled="cancelado">
+                                        {{ cancelado? 'Procesando...' : textoCancel }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-1 d-flex justify-content-center align-items-center pt-2">
-                            <button type="submit" class="btn" :disabled="enviando">
-                                Rastrear
-                            </button>
-                        </div>
-                     </form>
+                    </div>
                 </div>
             </div>
             <p class="line"></p>
@@ -26,8 +136,8 @@
             <div class="card w-60">
                 <div class="card-body">
                     <form @submit.prevent="nuevoProducto" class="row g-3 needs-validation" novalidate>
-                        <div class="col-md-6">
-                            <label for="producto" class="form-label">¿Qué nombre le pondrás?</label>
+                        <div class="col-lg-6 col-md-5 col-sm-3">
+                            <label for="producto" class="form-label">¿Qué nombre le pondrás?<span class="required">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-pen"></i></span>
                                 <input type="text" class="form-control limpiarCampo" name="producto" id="producto"
@@ -37,8 +147,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label for="precio" class="form-label">¿Qué valor le colocaras?</label>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <label for="precio" class="form-label">¿Qué valor le colocaras?<span class="required">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="any" class="form-control limpiarCampo" name="precio" id="precio"
@@ -48,8 +158,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label for="inventario" class="form-label">¿Cuántos hay en existencia?</label>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <label for="inventario" class="form-label">¿Cuántos hay en existencia?<span class="required">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-box-seam-fill"></i></span>
                                 <input type="number" class="form-control limpiarCampo" name="inventario" id="inventario"
@@ -59,8 +169,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label for="dimensiones" class="form-label">¿Cuál es su medida en cm?</label>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <label for="dimensiones" class="form-label">¿Cuál es su medida en cm?<span class="required">*</span></label>
                             <div class="input-group md-3">
                                 <span class="input-group-text"><i class="bi bi-rulers"></i></span>
                                 <input type="number" step="any" class="form-control limpiarCampo" name="dimensiones"
@@ -70,8 +180,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label for="tipo_entrega" class="form-label">Tipo de Entrega</label>
+                        <div class="col-lg-3 col-md-3 col-sm-3">
+                            <label for="tipo_entrega" class="form-label">Tipo de Entrega<span class="required">*</span></label>
                             <div class="input-group md-3">
                                 <span class="input-group-text"><i class="bi bi-cart-fill"></i></span>
                                 <select class="form-select limpiarCampo" name="tipo_entrega" id="tipo_entrega"
@@ -85,14 +195,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="img_ref" class="form-label">Muestra su mejor foto</label>
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <label for="img_ref" class="form-label">Muestra su mejor foto<span class="required">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-card-image"></i></span>
                                 <input type="file" id="img_ref" class="form-control limpiarCampo" ref="archivoInput">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-lg-6 col-md-6 col-sm-6">
                             <label for="comentario" class="form-label">Agrega un comentario</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-chat-dots-fill"></i></span>
@@ -100,8 +210,8 @@
                                 placeholder="Comentario"></textarea>
                             </div>
                         </div>
-                        <div class="col-md-10"></div>
-                        <div class="col-md-2 d-flex btn-group">
+                        <div class="col-lg-10 col-md-10 col-sm-10"></div>
+                        <div class="col-lg-2 col-md-2 col-sm-2 d-flex btn-group">
                             <button type="submit" class="btn" :disabled="enviando">
                                 {{ enviando ? 'Cargando...' : textoBoton }}
                             </button>
@@ -111,31 +221,126 @@
             </div>
         </div>
     </section>
+    </transition>
 </template>
 
 <script setup>
-
-    import { ref } from 'vue';
-    import { cargarProducto } from '@/services/catalogo-services';
+    import { ref, onMounted } from 'vue';
+    import { cargarProducto, obtenerPedido, completarVenta, calculoVentas } from '@/services/catalogo-services';
+    import { cerrarSesion } from '@/services/usuario-services';
     // Importa script para notificaciones SweetAlert2
     import alertas from '@/assets/js/notifications';
     // Importa archivo de errores
     import { getErrorMessages } from '@/assets/errorMessages';
+    import router from '@/router';
 
-    const v_producto = defineModel('producto');
-    const v_precio = defineModel('precio');
-    const v_dimensiones = defineModel('dimensiones');
-    const v_disponible = ref("");
-    const v_inventario = defineModel('invetnario');
-    const v_comentario = defineModel('comentario');
+    // Variable busqueda
+    const v_cve_busqueda = ref('');
+    // Variables formularios
+    const v_producto = ref('');
+    const v_precio = ref(0);
+    const v_dimensiones = ref(0);
+    const v_disponible = ref('');
+    const v_inventario = ref(0);
+    const v_comentario = ref('');
 
     const archivoInput = ref(null);
     const enviando = ref(false);
     // Variable para texto de botón
     const textoBoton = ref('Cargar producto');
+    // Contiene el producto buscado
+    const prod_reastreado = ref([]);
+    const sumaProdCantidad = ref({
+        totalCosto: 0,
+        totalCantidad: 0
+    });
+    // Variables para manejo de pedido
+    const textoCompl = ref('Marcar completado');
+    const textoCancel = ref('Marcar cancelado');
+    const completado = ref(false);
+    const cancelado = ref(false);
+    // Vartiable para conteo
+    const conteoVentas = ref({});
+        // Escucha el cambio del tipo de producto
+    onMounted(() => {
+        // Recarga de catalogo
+        obtenerConteoVentas({'periodo': 'actual'});
+    });
+    // Función para rastrear produto
+    async function rastrearProducto() {
+        $('.overlay-spinner').show();
+        limpiarCampo('busqueda');
 
+        const producto = v_cve_busqueda.value;
+        if (producto == '') {
+            $('.overlay-spinner').hide();
+            alertas.alertWarning(getErrorMessages(104), false, 1500);
+            return;
+        }
+        await obtenerPedido({'cve': producto}).then(
+            (response) => {
+                if (response.error) {
+                    alertas.alertError(response.error);
+                } else {
+                    if (response?.pedido) {
+                        prod_reastreado.value = response.pedido;
+                        response.pedido.forEach(el => {
+                            sumaProdCantidad.value.totalCosto += el.precio * el.cantidad;
+                            sumaProdCantidad.value.totalCantidad += el.cantidad;
+                        });
+                    } else {
+                        alertas.alertWarning(response.info);
+                    }
+                }
+                $('.overlay-spinner').hide();
+            }
+        );
+    }
+    // Función para marcar como completado o venta finalizada
+    async function cambiarEstadoPedido(estado) {
+        $('.overlay-spinner').show();
 
+        let pregunta, mensaje;
+        if (estado == 'completar') {
+            pregunta = '¿Completar venta?';
+            mensaje = 'Venta completada';
+        }
+        if (estado == 'cancelar') {
+            pregunta = '¿Cancelar venta?';
+            mensaje = 'Venta cancelada';
+        }
+        const completar = await alertas.alertQuestion(pregunta);
+        if (completar.isConfirmed) {
+            await completarVenta({
+                'cve': v_cve_busqueda.value,
+                'estado': estado
+            }).then(
+                (response) => {
+                    if (response.error) {
+                        alertas.alertError(response.error);
+                    } else {
+                        alertas.alertSuccess(mensaje);
+                        limpiarCampo('tabla');
+                    }
+                }
+            );
+        }
+        $('.overlay-spinner').hide();
+        obtenerConteoVentas({'periodo': 'actual'});
+    }
+    const formatearMoneda = (valor) => {
+        if (valor == null) return '$0.00';
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN',
+                minimumFractionDigits: 2, // Fuerza a que siempre tenga mínimo 2 decimales
+                maximumFractionDigits: 2  // Redondea a máximo 2 decimales
+        }).format(valor);
+    };
+    // Función para agregar un nuevo producto
     async function nuevoProducto() {
+        $('.overlay-spinner').show();
+
         const camposCompletos = ref(true);
         enviando.value = true;
 
@@ -149,18 +354,38 @@
             "imagen": archivoInput.value.files[0]
         }
         // Control formulario
-        if (v_inventario.value <= 0 && v_disponible.value == 1) {
+        if (producto['inventario'] <= 0 && producto['tipo_entrega'] == '') {
+            producto['tipo_entrega'] = 2;
+        }
+        if (producto['inventario'] <= 0 && producto['tipo_entrega'] == 1) {
             camposCompletos.value = false;
             alertas.alertWarning(getErrorMessages(100), false, 2500);
             enviando.value = false;
+            $('.overlay-spinner').hide();
+        }
+        if (producto['precio'] <= 0) {
+            camposCompletos.value = false;
+            alertas.alertWarning(getErrorMessages(102), false, 2500);
+            enviando.value = false;
+            $('.overlay-spinner').hide();
+        }
+        if (producto['dimensiones'] <= 0) {
+            camposCompletos.value = false;
+            alertas.alertWarning(getErrorMessages(103), false, 2500);
+            enviando.value = false;
+            $('.overlay-spinner').hide();
         }
         // Menejo de formulario, campos vacios
         $.each(producto, function (index, element) {
             // Campos requeridos
-            if ((element == undefined && index != 'comentario') || element == '') {
-                camposCompletos.value = false;
-                alertas.alertWarning(getErrorMessages(101), false);
-                enviando.value = false;
+            const requeridos = ['precio', 'dimensiones', 'imagen', 'producto'];
+            if (requeridos.includes(index)) {
+                if (element === undefined || element === '') {
+                    camposCompletos.value = false;
+                    alertas.alertWarning(getErrorMessages(101), false);
+                    enviando.value = false;
+                    $('.overlay-spinner').hide();
+                }
             }
         });
         // Entra si se valida que los campos viene completos
@@ -172,22 +397,80 @@
                         enviando.value = true;
                     } else {
                         enviando.value = false;
-                        limpiarCampo();
+                        limpiarCampo('add');
                         alertas.alertSuccess(getErrorMessages(200));
                     }
+                    $('.overlay-spinner').hide();
                 }
             );
         }
     }
     // Función para limpiar los campos
-    function limpiarCampo() {
-        v_producto.value = '';
-        v_precio.value = '';
-        v_dimensiones.value = '';
-        v_disponible.value = 1;
-        v_inventario.value = 0;
-        v_comentario.value = '';
-        archivoInput.value.value = '';
+    function limpiarCampo(section) {
+        if (section == 'add') {
+            v_producto.value = '';
+            v_precio.value = '';
+            v_dimensiones.value = '';
+            v_disponible.value = 1;
+            v_inventario.value = 0;
+            v_comentario.value = '';
+            archivoInput.value.value = '';
+        }
+        if (section == 'tabla') {
+            v_cve_busqueda.value = '';
+            prod_reastreado.value = [];
+            sumaProdCantidad.value = {
+                totalCosto: 0,
+                totalCantidad: 0
+            };
+        }
+        if (section == 'busqueda') {
+            prod_reastreado.value = [];
+            sumaProdCantidad.value = {
+                totalCosto: 0,
+                totalCantidad: 0
+            };
+        }
+    }
+    // Función para obtener conteo de ventas
+    const obtenerConteoVentas = async (params) => {
+        calculoVentas(params).then(
+            (data) => {
+                conteoVentas.value = data;
+            }
+        ).catch(error => {
+            console.log("Error al obtener los datos: ", error);
+            alertas.alertError('Error al obtener las ventas');
+        });
+    };// Llama los archivos al iniciar la página
+
+    // Función para el cerrado de sesion
+    async function cerradoDeSesion() {
+        const params = {
+            'user': localStorage.getItem('admin_user'),
+            'token': localStorage.getItem('admin_token')
+        };
+        $('.overlay-spinner').show();
+        cerrarSesion(params).then(
+            (response) => {
+                $('.overlay-spinner').hide();
+
+                if (response.error) {
+                    alertas.alertError(response.error);
+                } else if (response.detail) {
+                    alertas.alertError(response.detail);
+                } else {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_token_expires');
+
+                    router.push('login_panel');
+                }
+            }
+        ).catch(error => {
+            $('.overlay-spinner').hide();
+            console.log("No fue posible cerrar sesión: ", error);
+            alertas.alertError('No fue posible cerrar sesión');
+        });
     }
 </script>
 
@@ -212,4 +495,89 @@
         margin-top: 1rem;
         background-color: rgba(0, 0, 0, 0.185);
     }
+
+    .required {
+        color: red;
+        margin-left: 2px;
+    }
+
+    #fTotales td{
+        background: #b5347050 !important;
+    }
+
+    #ventasCompletas,
+    #ventasCanceladas,
+    #masSolicitados {
+        font-weight: bold;
+    }
+
+    #ventasCompletas {
+        background-color: #b5347050;
+    }
+
+    #icon-cash,
+    #icon-cancel,
+    #icon-top {
+        padding: 7px;
+        position: absolute;
+        top: 3rem;
+        left: 18rem;
+    }
+
+    #icon-cash svg,
+    #icon-cancel svg,
+    #icon-top svg {
+        opacity: 0.5;
+    }
+
+        /** media */
+    @media (max-width: 1400px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            left: 15rem !important;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            left: 12.5rem !important;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 990px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            left: 33rem !important;
+        }
+    }
+
+    @media (min-width: 500px) and (max-width: 766px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            left: 18rem !important;
+        }
+    }
+
+    @media (min-width: 430px) and (max-width: 500px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            left: 15rem !important;
+        }
+    }
+
+    @media (max-width: 380px) {
+        #icon-cash,
+        #icon-cancel,
+        #icon-top {
+            top: 4rem;
+            left: 11rem !important;
+        }
+    }
+
 </style>

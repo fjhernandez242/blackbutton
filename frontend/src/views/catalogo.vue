@@ -1,76 +1,88 @@
 <template>
-    <section class="container">
-        <div class="card" id="temporizador">
-            <div class="card-body">
-                <small>{{ temporizador }}</small>
+    <Transition>
+        <section class="container">
+            <div class="card" id="temporizador">
+                <div id="msgTempExp">
+                    <h6><b>Los Amigurumis con etiqueta "Sobre pedido" son apartados por 15 minutos</b></h6>
+                    <small>Al expirar el tiempo saldrán de tu carrito y de apartados.</small>
+                </div>
+                <div class="card-body d-flex">
+                    <i class="bi bi-info-circle py-2 pe-2" @click="infoTiempo(true)" style="font-size: 1rem; cursor: pointer;"></i>
+                    <small>{{ temporizador }}</small>
+                </div>
             </div>
-        </div>
-        <div v-if="catalogo.length" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-1">
-            <div v-for="producto in catalogo" :key="producto.id">
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <div class="container-img">
-                                <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
-                                    class="img-fluid" @click="selecProducto(producto.id)" :id="`img_${producto.id}`">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <h5>{{ producto.producto }}</h5>
-                            <div class="row pb-2">
-                                <div class="col-md-6 text-start">
-                                    <span>
-                                        <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
-                                    </span>
-                                </div>
-                                <div class="col-md-6 text-end">
-                                    <small>
-                                        <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
-                                    </small>
+            <div v-if="catalogo.length" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-1">
+                <div v-for="producto in catalogo" :key="producto.id">
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <div class="container-img">
+                                    <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
+                                        class="img-fluid" @click="selecProducto(producto.id)" :id="`img_${producto.id}`">
                                 </div>
                             </div>
-                            <div v-if="producto.tipo_entrega == 2">
-                                <div class="input-group mb-1">
-                                    <span class="input-group-text">Cantidad</span>
-                                    <input type="number" :id="`cantProdPed_${producto.id}`" class="form-control"
-                                    placeholder="0">
+                            <div class="card-body">
+                                <h5>{{ producto.producto }}</h5>
+                                <div class="row pb-2">
+                                    <div class="col-md-6 text-start">
+                                        <span>
+                                            <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <small>
+                                            <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
+                                        </small>
+                                    </div>
+                                </div>
+                                <div v-if="producto.tipo_entrega == 2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">Cantidad</span>
+                                        <select class="form-select" :id="`cantProdPed_${producto.id}`">
+                                            <option value="1" selected>1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <div class="input-group mb-1">
+                                        <label class="input-group-text" for="cantProd">Cantidad</label>
+                                        <select class="form-select" :id="`cantProd_${producto.id}`">
+                                            <option v-for="cantidad in producto.inventario" :value="cantidad">
+                                                {{ cantidad }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <button class="btn btn_carrito w-100" @click="addTopCart(producto)">
+                                        <i class="bi bi-cart-plus"></i>
+                                        Agregar a carrito
+                                    </button>
                                 </div>
                             </div>
-                            <div v-else>
-                                <div class="input-group mb-1">
-                                    <label class="input-group-text" for="cantProd">Cantidad</label>
-                                    <select class="form-select" :id="`cantProd_${producto.id}`">
-                                        <option v-for="cantidad in producto.inventario" :value="cantidad">
-                                            {{ cantidad }}
-                                        </option>
-                                    </select>
-                                </div>
+                            <div class="card-footer badge text-dark footerInfo">
+                                <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
+                                <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
                             </div>
-                            <div class="input-group">
-                                <button class="btn btn_carrito w-100" @click="addTopCart(producto)">
-                                    <i class="bi bi-cart-plus"></i>
-                                    Agregar a carrito
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-footer badge text-dark footerInfo">
-                            <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
-                            <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
                         </div>
                     </div>
                 </div>
+                <modalProducto
+                    :producto=prodConsultado
+                    :visible="mostrarModal"
+                    @cerrar-modal="cerrarModal"/>
             </div>
-            <modalProducto
-                :producto=prodConsultado
-                :visible="mostrarModal"
-                @cerrar-modal="cerrarModal"/>
-        </div>
-        <div v-else class="row g-1">
-            <div class="col-12">
-                <h4 class="text-center pb-2">No se encontraron amigurumis</h4>
+            <div v-else class="row g-1">
+                <div class="col-12">
+                    <h4 class="text-center pb-2">No se encontraron amigurumis</h4>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </Transition>
 </template>
 
 <script setup>
@@ -93,17 +105,17 @@
     const temporizador = ref('');
     // Agrega a carrito
     const addTopCart = (params) => {
+        // ID del temporizador
         const idSearch = params.tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
         const cantidad = $('#'+ idSearch + params.id).val();
-        if (cantidad.length == 0) {
-            alertas.alertWarning('Cantidad requerida', false);
-            return false;
-        }
         if (params.tipo_entrega == 1) {
             $('#'+ idSearch + params.id).val('1');
+            if (!cartStore.expiracion.id_temp) {
+                infoTiempo();
+            }
             ctrlInventario(params, cantidad);
         } else {
-            $('#'+ idSearch + params.id).val('');
+            $('#'+ idSearch + params.id).val('1');
         }
         cartStore.addItem(params, cantidad);
     };
@@ -133,12 +145,22 @@
             // Guarda el codigo temporal y la fecha de expración
             if (!cartStore.expiracion.id_temp) {
                 cartStore.setTemp(apartado.cod_tem, apartado.time_expired);
-                $('#temporizador').show();
-                $('#temp_offcanvas').show();
+                if (cartStore.expiracion.id_temp) {
+                    $('#temporizador').show();
+                    $('#temp_offcanvas').show();
+                }
             }
         }
         listarProductos({'cambioTipo': 0});
     };
+    const infoTiempo = (click) => {
+        if (click) {
+            $('#msgTempExp').stop(true, true).show();
+        } else {
+            setTimeout(() => $('#msgTempExp').stop(true, true).show(), 1500);
+        }
+        setTimeout(() => $('#msgTempExp').fadeOut(), 5000);
+    }
     const currentTipo = computed(() => cartStore.tipoEntrega);
 
     watch(() => cartStore.tipoEntrega, (params) => {
@@ -151,7 +173,10 @@
             $('#temp_offcanvas').fadeOut();
             devolver();
         }
-
+    })
+    // Señal entrante para recargar catalogo al quitar productos del carrito
+    watch(() => cartStore.recarga, () => {
+        listarProductos({'cambioTipo': 0});
     })
     // Retorna de producto
     const devolver = async () => {
@@ -309,7 +334,7 @@
         display: none;
         position: fixed;
         right: 0;
-        top: 8rem;
+        top: 6rem;
         margin: 1rem;
         z-index: 1;
         box-shadow: 0 7px 25px rgb(181, 52, 113);
@@ -322,16 +347,56 @@
         padding-bottom: 2px;
     }
 
+    #msgTempExp {
+        display: none;
+        position: fixed;
+        background-color: rgb(238, 247, 255);
+        padding: 1.5rem;
+        border-radius: 50px 0 80px 20px;
+        right: 7rem;
+        left: 68rem;
+        box-shadow: 0 7px 15px rgb(181, 52, 113);
+        top: 8.3rem;
+        transition: all 0.7ms;
+    }
+
     /** media */
-    @media (max-width: 768px) {
-        .container-img {
-            height: 200px;
+    @media (min-width: 1700px) and (max-width: 1800px) {
+        #msgTempExp {
+            left: 70rem;
         }
     }
 
-    @media (max-width: 480px) {
-        .container-img {
-            height: 180px;
+    @media (min-width: 1300px) and (max-width: 1700px) {
+        #msgTempExp {
+            left: 50rem;
         }
     }
+
+    @media (min-width: 1125px) and (max-width: 1300px) {
+        #msgTempExp {
+            left: 40rem;
+        }
+    }
+
+    @media (min-width: 800px) and (max-width: 1125px) {
+        #msgTempExp {
+            left: 20rem;
+        }
+    }
+
+    @media (min-width: 481px) and (max-width: 800px) {
+        #msgTempExp {
+            /* Este estilo NO afectará a móviles (menos de 480px) */
+            /* NI a laptops (más de 768px) */
+            left: 10rem;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        #msgTempExp {
+            left: 1rem;
+        }
+    }
+
 </style>

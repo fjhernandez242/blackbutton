@@ -3,18 +3,24 @@ import { defineStore } from 'pinia';
 
 export const useNotificationStore = defineStore('notification', {
     state: () => ({
-        mostrarAlert: false,
-        mensaje: ''
+        notifications: [] // Cambiamos variables únicas por un arreglo
     }),
     actions: {
         lanzarAlerta(msj) {
-            this.mensaje = msj;
-            this.mostrarAlert = true;
+            const id = Date.now(); // ID único basado en tiempo
 
+            // Añadimos la nueva notificación al arreglo
+            this.notifications.push({
+                id,
+                mensaje: msj
+            });
             // Auto-cerrado opcional tras 1.5 segundos
             setTimeout(() => {
-                this.mostrarAlert = false;
-            }, 1500);
+                this.eliminarAlerta(id);
+            }, 3000);
+        },
+        eliminarAlerta(id) {
+            this.notifications = this.notifications.filter(n => n.id !== id);
         }
     }
 });

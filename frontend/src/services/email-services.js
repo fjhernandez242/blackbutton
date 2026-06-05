@@ -1,4 +1,5 @@
 import { useCartStore } from "@/store/cartStore";
+const numberWhatsapp = import.meta.env.VITE_NUMBER;
 
 export const sendMessage = (code) => {
     // Obtenemos los datos de Store
@@ -16,7 +17,6 @@ export const sendMessage = (code) => {
             });
     });
     // Envio de mensaje por WhatsApp
-    const numero = "+524641479724";
     const listaProductos = productos.map(p => {
         return `*• ${p.nombre}* ` +
             `\n      Cantidad: ${p.cantidad}` +
@@ -40,12 +40,12 @@ export const sendMessage = (code) => {
     const mensaje = `*📦 ¡Nuevo Pedido! 📦*\n\n` +
         `Hola, me interesan los siguientes amigurumis:\n` +
         `${listaProductos}\n\n` +
-        `*Número de pedido*: ${code}\n` +
+        `*Código de pedido*: ${code}\n` +
         `*Subtotal*: ${subtotalFormateado}\n` +
         `*Envió*: $${envio}\n` +
         `*Total*: ${totalFormateado}\n\n` +
         `_Enviado desde BlackButton web_`;
-    const url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensaje)}`;
+    const url = `https://api.whatsapp.com/send?phone=${numberWhatsapp}&text=${encodeURIComponent(mensaje)}`;
     window.open(url, "_black");
 
 };

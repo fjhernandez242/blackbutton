@@ -5,6 +5,9 @@
         <nav class="navbar navbar-expand-lg flex-grow-1">
             <div class="container-fluid">
                 <h3 id="titleNavbar">BlackButton</h3>
+                <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex ps-2">
+                    <img src="../../assets/img/icono_facebook.png" alt="Facebook" style="max-width: 30px;">
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -62,6 +65,8 @@
       // Función para cargar los productos en el carrito
     const loadedProducts = () => {
         loader.value = cartStore.loadedProducts;
+        // Envia señal para recarga en catalogo
+        cartStore.recargaCatalogo();
     }
     // Cambio de tipo de producto
     const cambiarTipo = (nuevoTipo) => {
@@ -71,6 +76,7 @@
     // Sección: Busqueda
     const v_search = ref('');
     watch(v_search, (nuevoValor, viejoValor) => {
+        console.log(nuevoValor);
         if (cartStore.tipoEntrega.search == undefined || cartStore.tipoEntrega.search == '') {
             cartStore.cambiarTipoEntrega(ref({'cambioTipo': 0}));
         }

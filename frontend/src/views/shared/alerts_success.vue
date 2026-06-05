@@ -1,24 +1,63 @@
 <template>
-    <div class="alert alert-success d-flex align-items-center fade show" v-if="store.mostrarAlert">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-        </svg>
-        <div>
-            {{ store.mensaje }}
-        </div>
+    <div class="notification-container">
+        <TransitionGroup name="list" tag="div">
+            <div
+                v-for="notification in store.notifications"
+                :key="notification.id"
+                class="alert-item"
+                >
+                {{ notification.mensaje }}
+                <button @click="store.eliminarAlerta(notification.id)">x</button>
+            </div>
+        </TransitionGroup>
     </div>
 </template>
 
 <script setup>
     import { useNotificationStore } from '@/store/notificationStore';
-
     const store = useNotificationStore();
 </script>
 
 <style scoped>
-    .alert {
-        top: 105%;
-        position: absolute;
-        right: 0;
+    .notification-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 9999;
+    }
+
+    .alert-item {
+        background-color: rgb(238, 247, 255);
+        color: black;
+        padding: 1rem;
+        margin-top: 5px;
+        border-radius: 8px;
+        min-width: 200px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    /* Animaciones de Vue */
+    .list-enter-active, .list-leave-active {
+        transition: all 0.5s ease;
+    }
+    .list-enter-from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    .list-leave-to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    button {
+        border: none;
+        border-radius: 8px;
+        background: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 </style>

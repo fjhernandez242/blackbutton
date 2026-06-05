@@ -6,7 +6,7 @@ export function getProductos(params) {
         method: 'POST',
         body: JSON.stringify(params),
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         }
     }).then(
         (response) => {
@@ -19,6 +19,8 @@ export function getProductos(params) {
 }
 // Servicio para cargar nuevo producto
 export function cargarProducto(params) {
+    // const token = import.meta.env.VITE_TOKEN_LOCAL;
+    const token = localStorage.getItem('admin_token');
 
     const formData = new FormData();
     formData.append("producto", params.producto);
@@ -33,7 +35,7 @@ export function cargarProducto(params) {
         method: 'POST',
         body: formData,
         headers: {
-            'Authorization': "Token ba272486f37c7250b28ff645d6d0d31ef34e49b1" // VPS
+            'Authorization': token
         }
     }).then(
         (response) => {
@@ -75,13 +77,14 @@ export function agregarPedido(params, codigo_temp) {
     return fetch(URLS.AGREGAR_PEDIDO, {
         method: 'POST',
         body: JSON.stringify({
-            "id": params.id,
-            "cantidad": params.quantity,
-            "tipo_entrega": params.tipo_entrega,
-            "codigo_temp": codigo_temp
+            'id': params.id,
+            'cantidad': params.quantity,
+            'tipo_entrega': params.tipo_entrega,
+            'codigo_temp': codigo_temp,
+            'pedido': params.pedido
         }),
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         }
     }).then(
         (response) => {
@@ -100,7 +103,7 @@ export function setterProducto(params) {
         method: 'POST',
         body: JSON.stringify(params),
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         }
     }).then(
         (response) => {
@@ -119,7 +122,7 @@ export function apartarProducto(params) {
         method: 'POST',
         body: JSON.stringify(params),
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         }
     }).then(
         (response) => {
@@ -130,5 +133,75 @@ export function apartarProducto(params) {
             }
             return response.json()
         }
+    );
+}
+
+// Obtener pedido
+export function obtenerPedido(params) {
+    // const token = import.meta.env.VITE_TOKEN_LOCAL;
+    const token = localStorage.getItem('admin_token');
+
+    return fetch(URLS.OBTENER_PEDIDO, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        }
+    }).then(
+        (response) => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
+                });
+            }
+            return response.json();
+        }
+    );
+}
+
+// Cambiar estado de ventas
+export function completarVenta(params) {
+    // const token = import.meta.env.VITE_TOKEN_LOCAL;
+    const token = localStorage.getItem('admin_token');
+
+    return fetch(URLS.ESTADO_VENTA, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        }
+    }).then(
+        (response) => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
+                });
+            }
+            return response.json();
+        }
+    );
+}
+
+// Obtiene conteo de ventas
+export function calculoVentas(params) {
+    // const token = import.meta.env.VITE_TOKEN_LOCAL;
+    const token = localStorage.getItem('admin_token');
+
+    return fetch(URLS.CALCULO_VENTAS, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        }
+    }).then(async (response) => {
+        if (!response.ok) {
+            const datosError = await response.json();
+            return datosError;
+        }
+        return response.json();
+    }
     );
 }

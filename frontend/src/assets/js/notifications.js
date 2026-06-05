@@ -51,7 +51,7 @@ const alertas = {
             cancelButtonText: "SMS",
             cancelButtonColor: "#006AFF"
         });
-    }
+    },
 }
 
 export default alertas;
