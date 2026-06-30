@@ -84,7 +84,7 @@ def enviar_codigo(request):
     # Contar cuántos códigos se han generado en un lapso de 24 horas
     codigos_enviados = codigo_recuperacion_model.objects.filter(periodo=ahora).count()
     # Validar el límite
-    if codigos_enviados >= 2:
+    if codigos_enviados >= 3:
         return Response(
             {
                 'error': 'Has superado el límite de 3 intentos de recuperación por día. Intentalo mañana.',
