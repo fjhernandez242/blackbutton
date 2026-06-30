@@ -198,7 +198,7 @@ def cambiar_contrasena(request):
         if data['password1'] != data['password2']:
             return Response({ 'error': 'Contraseñas no coinciden' }, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.get(username='prueba')
+        user = User.objects.get(username='weya')
         if user:
             user.set_password(data['password2'])
             user.save()
