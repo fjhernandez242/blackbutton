@@ -47,8 +47,43 @@ export function cargarProducto(params) {
             }
             return response.json();
         }
-    )
+    );
+}
+// Editar producto
+export function editarProducto(params) {
+    // const token = import.meta.env.VITE_TOKEN_LOCAL;
+    const token = localStorage.getItem('admin_token');
 
+    const formData = new FormData();
+    formData.append("id", params.id);
+    formData.append("estado", params.estado);
+    formData.append("producto", params.producto);
+    formData.append("precio", params.precio);
+    formData.append("dimensiones", params.dimensiones);
+    formData.append("tipo_entrega", params.tipo_entrega);
+    formData.append("inventario", params.inventario);
+    formData.append("comentario", params.comentario);
+    if (params.imagen !== undefined) {
+        formData.append("imagen", params.imagen);
+    }
+
+    return fetch(URLS.EDITAR_PRODUCTO, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Authorization': token
+        }
+    }).then(
+        (response) => {
+            if (!response.ok) {
+                // Mejora: Es útil incluir el body de error si es posible
+                return response.json().then(errorData => {
+                    throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
+                });
+            }
+            return response.json();
+        }
+    );
 }
 // Obtener producto por ID
 export function productoById(id) {
@@ -161,7 +196,7 @@ export function obtenerPedido(params) {
 }
 
 // Cambiar estado de ventas
-export function completarVenta(params) {
+export function procesarPedido(params) {
     // const token = import.meta.env.VITE_TOKEN_LOCAL;
     const token = localStorage.getItem('admin_token');
 
@@ -204,4 +239,17 @@ export function calculoVentas(params) {
         return response.json();
     }
     );
+}
+
+// Genera código de venta
+export function generaCodigoVenta() {
+    return fetch(URLS.CODIGO_VENTA, {
+        method: 'GET',
+    }).then(async (response) => {
+        if (!response.ok) {
+            const datosError = await response.json();
+            return datosError;
+        }
+        return response.json();
+    });
 }

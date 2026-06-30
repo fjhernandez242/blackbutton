@@ -105,6 +105,7 @@
     const temporizador = ref('');
     // Agrega a carrito
     const addTopCart = (params) => {
+        $('.overlay-spinner').show();
         // ID del temporizador
         const idSearch = params.tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
         const cantidad = $('#'+ idSearch + params.id).val();
@@ -118,6 +119,7 @@
             $('#'+ idSearch + params.id).val('1');
         }
         cartStore.addItem(params, cantidad);
+        $('.overlay-spinner').hide();
     };
     // Cambia el estado del producto
     const ctrlInventario = async (params, cantidad) => {
@@ -223,6 +225,7 @@
     // Arreglo para almacenar producto
     const prodConsultado = ref({});
     const obtenerProducto = async (idprod) => {
+        $('.overlay-spinner').show();
         // Espera la respuesta del servicio
         const response = await productoById(idprod);
         if (response?.producto) {
@@ -237,11 +240,16 @@
                 'inventario': data['inventario'],
                 'comentario': data['comentario']
             };
+            $('.overlay-spinner').hide();
         }
     }
-    function cerrarModal() {
+    const cerrarModal = ([accion, datos]) => {
         mostrarModal.value = false;
         idProducto.value = null;
+
+        if (accion == 'addProd' && datos) {
+            addTopCart(datos);
+        }
     }
 
 </script>
@@ -252,6 +260,7 @@
         padding-inline: 4rem;
         background-color: rgba(238, 247, 255, 0.705);
     }
+
     .card {
         margin-inline: 0.2rem;
     }
@@ -396,6 +405,10 @@
     @media screen and (max-width: 480px) {
         #msgTempExp {
             left: 1rem;
+        }
+
+        .container {
+            padding-inline: 0.5rem;
         }
     }
 

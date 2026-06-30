@@ -29,7 +29,7 @@
                  </div>
                  <!-- Información para forma de pago -->
                  <div class="collapse" id="infoPago">
-                     <div class="card card-body">
+                     <div class="card card-body mb-2">
                          El proceso final se realizar con ayuda de WhatsApp, al presionar el botón <b>Completar pedido</b> se te
                          redirigirá a WhatsApp para que puedas completar tu pedido.
                      </div>
@@ -114,6 +114,11 @@
             </div>
         </div>
     </div>
+    <modalPedido
+        :ticket=ticketVenta
+        :codigo=codigoVentaGenerado
+        :visible="mostrarModal"
+        @cerrar-modal="cerrarModal"/>
 </template>
 
 <script setup>
@@ -121,8 +126,12 @@
     import { useCartStore } from '@/store/cartStore.js';
     import { API_BASE_URL } from '@/config/api-urls';
     import alertas from '@/assets/js/notifications';
-    import { agregarPedido, setterProducto } from '@/services/catalogo-services';
+    import { setterProducto, generaCodigoVenta } from '@/services/catalogo-services';
     import { sendMessage } from '@/services/email-services';
+    import modalPedido from '../modal/modalPedido.vue';
+    const mostrarModal = ref(false);
+    const ticketVenta = ref('');
+    const codigoVentaGenerado = ref('');
     // Recopilado de productos cargados en carrito
     // Instancia del store
     const cartStore = useCartStore();
@@ -183,40 +192,25 @@
 
     // Detecta el clic para pedido de productos
     const solicitar = async () => {
-        const result = await alertas.alertQuestion('¿Completar pedido?');
-        if (result.isConfirmed) {
-            const data = cartStore.items;
-            let codePedido = '';
-            for(const value of data) {
-                value.pedido = codePedido;
-                try {
-                    const response = await agregarPedido(value, cartStore.expiracion.id_temp);
-                    if (response.error) {
-                        alertas.alertError(response.error);
-                        break;
-                    } else {
-                        codePedido = response.code;
-                        sendMessage(response.code);
-                        $('#temp_offcanvas').fadeOut();
-                        $('#temporizador').fadeOut();
-                        cartStore.detenerTemporizador(false, true);
-                        cartStore.recargaCatalogo();
-                        setTimeout(() => location.reload(), 1000);
-                    }
-                } catch (err) {
-                    console.error("Error en la petición: ", err);
-                    break;
-                }
-            };
-            return false;
-        }
+        // Se genera un códgio de venta
+        const codigoGenerado = await generaCodigoVenta();
+        // Construye el ticket
+        let ticket = sendMessage(codigoGenerado['codigoVenta'], true);
 
+        ticketVenta.value = ticket;
+        codigoVentaGenerado.value = codigoGenerado['codigoVenta'];
+        mostrarModal.value = true;
     }
 
     const temp_offcanvas = ref('')
     watch(() => cartStore.segundos, (seg) => {
         temp_offcanvas.value = `${cartStore.minutos}:${seg < 10 ? '0' : ''}${seg}`;
     })
+
+    function cerrarModal() {
+        mostrarModal.value = false;
+        ticketVenta.value = '';
+    }
 </script>
 
 <style scoped>

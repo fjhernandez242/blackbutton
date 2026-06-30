@@ -9,14 +9,13 @@ from rest_framework.authentication import TokenAuthentication
 
 from .models import catalogo_model, pedidos_model, cookietem_header_model, cookietem_body_model
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 
 from .forms import CatalogoForm
 from django.db.models import Q, F, Count
+import calendar
 
 @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
 def productos(request):
     # if isinstance(request, list):
     # Optiene el tipo de entrega
@@ -24,20 +23,25 @@ def productos(request):
     # 1 - Regresa los de entrega inmediata
     # 2 - Regresa lo de sobre pedido
     data = request.data
-    if 'search' in data:
+    if data.get('search'):
         search = data['search']
         get_productos = catalogo_model.objects.filter(
             Q(producto__icontains=search) |
             Q(precio__icontains=search) |
-            ~Q(estado='R')
+            ~Q(estado='D')
         ).distinct()
     else :
         if data['cambioTipo'] == 0:
             # se obienen todos los productos
-            get_productos = catalogo_model.objects.exclude(estado='R')
+            filtros = {}
+            if not data.get('todos'):
+                filtros['estado'] = 'D'
+            # Pasamos los filtros usando **
+            # Si filtramos está vacío, equivale a .all()
+            get_productos = catalogo_model.objects.filter(**filtros)
         else:
             # Se obtienen solo los productos del tipo indicado
-            get_productos = catalogo_model.objects.filter(tipo_entrega=data['cambioTipo'])
+            get_productos = catalogo_model.objects.filter(tipo_entrega=data['cambioTipo'], estado='D')
     # Se envian a serializar el objeto
     serializer = CatalogoSerializer(instance=get_productos, many=True)
     return Response({ "productos": serializer.data }, status=status.HTTP_200_OK)
@@ -79,27 +83,30 @@ def agregar_producto(request):
 @permission_classes([IsAuthenticated])
 def editar_producto(request):
     form = request.data
-    exist_producto = catalogo_model.objects.filter(guia=form['guia'])
+    exist_producto = catalogo_model.objects.filter(id=form['id'])
     if not exist_producto.exists():
         return Response({ "warning": "No existe el producto" }, status=status.HTTP_404_NOT_FOUND)
     # Verifica que no exista un duplicado con la misma colocación y formato
     duplicado = catalogo_model.objects.filter(producto=form['producto']).exclude(id=form['id'])  # Excluye el actual registro para permitir la actualización
 
     if duplicado.exists():
-        return Response({ "warning": "¡Ya existe un registro con esa colocación y formato!" }, status=status.HTTP_304_NOT_MODIFIED)
+        return Response({ "warning": "¡Ya existe un amigurimi con ese nombre!" }, status=status.HTTP_200_OK)
+    try:
+        producto = catalogo_model.objects.get(id=form['id'])
+        producto.producto = form['producto']
+        producto.precio = form['precio']
+        producto.dimensiones = form['dimensiones']
+        if form.get('imagen'): ## Se garda la imagen solo si viene una
+            producto.imagen = form['imagen']
+        producto.tipo_entrega = form['tipo_entrega']
+        producto.comentario = form['comentario']
+        producto.inventario = form['inventario']
+        producto.estado = form['estado']
+        producto.save()
 
-    producto = catalogo_model.objects.get(guia=form['guia'])
-    producto.producto = form['producto']
-    producto.precio = form['precio']
-    producto.dimensiones = form['dimensiones']
-    producto.imagen = form['imagen']
-    producto.tipo_entrega = form['tipo_entrega']
-    producto.inventario = form['inventario']
-    producto.comentario = form['comentario']
-    producto.estado = form['estado']
-    producto.save()
-
-    return Response({ "success": "Producto editado" }, status=status.HTTP_200_OK)
+        return Response({ "success": "Producto editado" }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({ "error": "No fue posible actualizar el producto" }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -121,12 +128,42 @@ def eliminar_producto(request):
 @permission_classes([IsAuthenticated])
 def getPedidoByClave(request):
     data = request.data
-    # Validamos que exista el pedido
-    get_pedido = pedidos_model.objects.filter(codigo_venta=data['cve'], estado=1)
+    get_pedido = None
+    if data.get('tipo') == 'cve':
+        # Validamos que exista el pedido con base a la clave
+        get_pedido = pedidos_model.objects.filter(codigo_venta=data['dato'])
+    elif data.get('tipo') == 'fecha':
+        if not data.get('filtro'):
+            get_pedido = pedidos_model.objects.filter(fecha_venta=data['dato'])
+        elif data.get('filtro'):
+            hoy = timezone.localdate()
+            anio = hoy.year
+            mes = hoy.month
+            if data.get('dato') == 'h':
+                get_pedido = pedidos_model.objects.filter(fecha_venta=hoy)
+            elif data.get('dato') == 'e':
+                _, ultimo_dia = calendar.monthrange(anio, mes)
+                mes_inicio = hoy.replace(day=1)
+                mes_ultimo = hoy.replace(day=ultimo_dia)
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(mes_inicio, mes_ultimo))
+            elif data.get('dato') == 'a':
+                primer_dia_mes_actual = hoy.replace(day=1)
+                fecha_mes_anterior = primer_dia_mes_actual - timedelta(days=1)
+                anio_anterior = fecha_mes_anterior.year
+                mes_anterior = fecha_mes_anterior.month
+                _, ultimo_dia = calendar.monthrange(anio_anterior, mes_anterior)
+                primer_dia_final = fecha_mes_anterior.replace(day=1)
+                ultimo_dia_final = fecha_mes_anterior.replace(day=ultimo_dia)
+
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(primer_dia_final, ultimo_dia_final))
+
+    if get_pedido is None:
+        return Response({"error": "No se proporciono una clave o fecha valida para la búsqueda"}, status=status.HTTP_200_OK)
     if not get_pedido.exists():
-        return Response({"info": "No se encontró el pedido"}, status=status.HTTP_200_OK)
+        return Response({"info": "No se encontraron pedidos"}, status=status.HTTP_200_OK)
     # Se recorre cada pedido
-    recopilado = []
+
+    recopilado = {}
     for pedido in get_pedido:
         producto = catalogo_model.objects.filter(id=pedido.id_producto).first()
         if producto is not None:
@@ -134,17 +171,40 @@ def getPedidoByClave(request):
             if producto.imagen:
                 url_imagen = request.build_absolute_uri(producto.imagen.url)
 
-            recopilado.append({
+            periodo = pedido.fecha_venta.strftime('%d/%m/%Y')
+            cve_venta = pedido.codigo_venta
+
+            precio_actual = float(producto.precio)
+            cantidad_actual = int(pedido.cantidad_vendida)
+            subtotal_actual = precio_actual * cantidad_actual
+
+            if periodo not in recopilado:
+                recopilado[periodo] = {}
+
+            if cve_venta not in recopilado[periodo]:
+                recopilado[periodo][cve_venta] = {
+                    'productos': [],
+                    'total_productos': 0,
+                    'total_costo': 0.0
+                }
+
+            # Suma de cantidades
+            recopilado[periodo][cve_venta]['total_productos'] += cantidad_actual
+            recopilado[periodo][cve_venta]['total_costo'] += subtotal_actual
+
+            # Se agregan producto
+            recopilado[periodo][cve_venta]['productos'].append({
                 'nombre': producto.producto,
                 'precio': float(producto.precio),
                 'tipo_entrega': producto.tipo_entrega,
-                'estado': producto.estado,
+                'estado': pedido.estado,
                 'imagen': url_imagen,
                 'cantidad': pedido.cantidad_vendida,
                 'codigo_temp': pedido.codigo_temp,
                 'estado_pedido': pedido.estado,
-                'fecha_pedido': pedido.fecha_venta.strftime('%d/%m/%Y %H:%M')
             })
+        else:
+            return Response({ "info": 'No se encontró el producto en cátalogo' }, status=status.HTTP_200_OK)
     return Response({ "pedido": recopilado }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -235,11 +295,11 @@ def agregar_pedido(request):
             cantidad_vendida = data['cantidad'],
             tipo_entrega = data['tipo_entrega'],
             estado = 1,
-            fecha_venta = timezone.now()
+            fecha_venta = timezone.localdate()
         )
+        return Response({ "success": "Pedido cargado", "code": code_pedido }, status=status.HTTP_200_OK)
     except:
-            return Response({ "error": "Algo salio mal al cargar el pedido" })
-    return Response({ "success": "Pedido cargado", "code": code_pedido }, status=status.HTTP_200_OK)
+        return Response({ "error": "Algo salio mal al cargar el pedido" })
 
 @api_view(['POST'])
 def setterProducto(request):
@@ -375,6 +435,11 @@ def obtener_expiracion(request):
 
     serializer = HeaderApartadosSerializer(instance=expiracion)
     return Response({ "productos": serializer.data }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def codigo_venta(request):
+    codigo = genera_codigo_venta()
+    return Response({ 'codigoVenta': codigo }, status=status.HTTP_200_OK)
 
 def genera_codigo_venta(limit=6):
     import random, string

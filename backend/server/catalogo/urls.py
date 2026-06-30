@@ -14,4 +14,5 @@ urlpatterns = [
     re_path('obtenerPedidco', views.getPedidoByClave),
     re_path('cambioEstadoVenta', views.cambioEstadoVenta),
     re_path('calculoMovimientos', views.calculoMovimientos),
+    re_path('generaCodigoVenta', views.codigo_venta),
 ]

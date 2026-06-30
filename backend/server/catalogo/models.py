@@ -11,6 +11,7 @@ class catalogo_model(models.Model):
     class estado_venta(models.TextChoices):
         DISPONIBLE = 'D', _('Disponible')
         RESERVADO = 'R', _('Reservado')
+        AGOTADO = 'A', _('Agotado')
 
     producto = models.CharField(max_length=255, verbose_name='Producto', null=True, blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Precio', null=True, blank=True)
@@ -46,7 +47,7 @@ class pedidos_model(models.Model):
     cantidad_vendida = models.IntegerField(verbose_name='Cantidad vendida', null=True, blank=True)
     tipo_entrega = models.IntegerField(default=tipo_de_entrega.INMEDIATA, choices=tipo_de_entrega.choices, verbose_name='Tipo de entrega', null=True, blank=True)
     estado = models.IntegerField(default=estado_pedido.PROCESO, choices=estado_pedido.choices, verbose_name='Estado de la venta', null=True, blank=True)
-    fecha_venta = models.DateTimeField(verbose_name='Fecha de venta', null=True, blank=True)
+    fecha_venta = models.DateField(verbose_name='Fecha de venta', null=True, blank=True)
 
     class Meta:
         verbose_name='Pedido'

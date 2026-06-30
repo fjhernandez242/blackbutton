@@ -73,10 +73,12 @@ export const useCartStore = defineStore('cart', {
             this.saveToLocalStorage();
             return id;
         },
+
         cambiarTipoEntrega(params) {
             this.tipoEntrega = params;
             this.saveToLocalStorage();
         },
+
         setTemp(id_temp, time_expira) {
             this.expiracion.id_temp = id_temp;
             this.expiracion.time_expira = time_expira;

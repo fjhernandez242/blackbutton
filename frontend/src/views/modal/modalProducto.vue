@@ -11,7 +11,7 @@
                         <div class="card h-100 shadow-sm" id="cardinfo">
                             <div class="card-body d-flex flex-column" style="overflow-y: auto;">
                                 <div class="row">
-                                    <div class="col-xl-6 card-img-container" id="imgContent">
+                                    <div class="col-xl-6 card-img-container mb-3" id="imgContent">
                                         <img :src="rutaImagen(v_imagen)" alt="" id="imgEdit">
                                     </div>
                                     <div class="col-xl-6">
@@ -81,6 +81,7 @@
     const v_precio = defineModel('precio');
     const v_dimensiones = defineModel('dimensiones');
     const v_disponible = defineModel('disponible');
+    const v_disponible_sin_formato = defineModel('disponibleSF');
     const v_inventario = defineModel('inventario');
     const v_comentario = defineModel('comentario');
 
@@ -113,6 +114,7 @@
                 v_precio.value = prod.precio;
                 v_dimensiones.value = prod.dimensiones;
                 v_disponible.value = prod.tipo_entrega == 1 ? 'Inmediata' : 'Sobre pedido';
+                v_disponible_sin_formato.value = prod.tipo_entrega;
                 v_inventario.value = prod.inventario;
                 v_comentario.value = prod.comentario !== 'undefined' ? prod.comentario : '';
 
@@ -130,20 +132,21 @@
             'producto': v_producto.value,
             'precio': v_precio.value,
             'dimensiones': v_dimensiones.value,
+            'tipo_entrega': v_disponible_sin_formato.value,
             'imagen': v_imagen.value
         }
-        cartStore.addItem(params);
+        emit('cerrar-modal', ['addProd', params]);
+        // cartStore.addItem(params);
     };
 
     // Función para cerrar el modal y notificar al padre
     function modalClose() {
         cerrarmodal();
-        emit('cerrar-modal');
+        emit('cerrar-modal', ['cancelar', null]);
     }
     function addProduct() {
         addTopCart();
         cerrarmodal();
-        emit('cerrar-modal');
     }
     // Contruye la ruta de la imagen
     const rutaImagen = (urlRelativa) => {

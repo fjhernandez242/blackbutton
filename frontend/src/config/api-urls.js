@@ -1,6 +1,6 @@
 // Url base
-// export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
-export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
+// export const API_BASE_URL = 'http://localhost:8000';
 // Urls endpoint
 export const URLS = {
     // Url para inicio de sesion
@@ -9,6 +9,12 @@ export const URLS = {
     CERRAR_SESION: `${API_BASE_URL}/usuarios/logout`,
     // Obtiene todos los usuarios
     LISTAR_USUARIOS: `${API_BASE_URL}/usuarios/getAll`,
+    // Url para reestablecer contraseña
+    SEND_CODE: `${API_BASE_URL}/usuarios/enviarCodigo`,
+    // Url para validar código
+    VALID_CODE: `${API_BASE_URL}/usuarios/validarCodigo`,
+    // Url para cambiar contrasena
+    RESTAR_PASS: `${API_BASE_URL}/usuarios/restartPass`,
     // Url para listar todos los productos
     LISTAR_PRODUCTOS: `${API_BASE_URL}/catalogo/listado`,
     // Url para cambiar agregar un producto
@@ -33,4 +39,6 @@ export const URLS = {
     ESTADO_VENTA: `${API_BASE_URL}/catalogo/cambioEstadoVenta`,
     // Url para obtener el calculo de ventas
     CALCULO_VENTAS: `${API_BASE_URL}/catalogo/calculoMovimientos`,
+    // Url para generar código de venta
+    CODIGO_VENTA: `${API_BASE_URL}/catalogo/generaCodigoVenta`,
 };

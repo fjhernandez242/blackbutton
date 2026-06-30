@@ -20,6 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+## Datos envio de código de recuperación
+
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USER = env('EMAIL_USER')
+EMAIL_PASSWORD = env('EMAIL_PASSWORD')
+EMAIL_DESTINO = env('EMAIL_DESTINO')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 

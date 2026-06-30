@@ -3,10 +3,10 @@
         <div class="container d-flex justify-content-center align-items-center vh-100">
             <div class="card shadow-lg p-4">
                 <div class="card-header border-0 text-center">
-                    <h3>¡Bienvenida!</h3>
-                    <div id="img_bienvenida">
+                    <h3>Panel de adminstración</h3>
+                    <!--div id="img_bienvenida">
                         <img src="/src/assets/img/crocket.png" alt="">
-                    </div>
+                    </div-->
                 </div>
                 <div class="card-body">
                     <form @submit.prevent="login" novalidate id="form_login">
@@ -44,18 +44,16 @@
             @cerrar-modal="cerrarModal"/>
     </section>
 </template>
+
 <script setup>
     import { ref, onMounted } from 'vue';
     import alertas from '@/assets/js/notifications';
-    import { inicioSesion } from '@/services/usuario-services';
-    import { useCartStore } from '@/store/cartStore';
+    import { inicioSesion, enviarCodigo } from '@/services/usuario-services';
     import router from '@/router';
     import { useRoute } from 'vue-router';
     import modalRecuperacion from './modal/modalRecuperacion.vue';
 
     const route = useRoute();
-
-    const cartStore = useCartStore();
 
     // Creación de variables del formulario
     const v_user = ref('');
@@ -71,10 +69,18 @@
     }
     // Función para recuperación de contraseña
     async function recuperarContrasena() {
-        let response = await alertas.alertQuestion('¿Iniciar recuperación de contraseña?');
+        let response = await alertas.alertQuestion('¿Enviar código de recuperación?');
         if (response.isConfirmed) {
-
-            mostrarModal.value = true;
+            $('.overlay-spinner').show();
+            let sendCode = await enviarCodigo();
+            if (sendCode.correcto) {
+                mostrarModal.value = true;
+            } else if (sendCode.mensaje == 'limite') {
+                alertas.alertWarning(sendCode.error, true, 3500);
+            } else {
+                alertas.alertWarning('No fue posible enviar el código de recuperación');
+            }
+            $('.overlay-spinner').hide();
         }
     }
     // Función de logeo
@@ -132,6 +138,7 @@
         $('#floatingInput').removeClass('campoVacio');
     });
 </script>
+
 <style scoped>
     .card {
         width: 100%;

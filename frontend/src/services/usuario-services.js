@@ -44,3 +44,51 @@ export function cerrarSesion(params) {
         return response.json();
     });
 }
+
+export function enviarCodigo() {
+    return fetch(URLS.SEND_CODE, {
+        method: 'POST',
+        body: JSON.stringify({ 'restart': true }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async (response) => {
+        if (!response.ok) {
+            const datosError = await response.json();
+            return datosError;
+        }
+        return response.json();
+    });
+}
+
+export function validarCodigoRecuperacion(param) {
+    return fetch(URLS.VALID_CODE, {
+        method: 'POST',
+        body: JSON.stringify(param),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async (response) => {
+        if (!response.ok) {
+            const datosError = await response.json();
+            return datosError;
+        }
+        return response.json();
+    })
+}
+
+export function cambiarContrasena(param) {
+    return fetch(URLS.RESTAR_PASS, {
+        method: 'POST',
+        body: JSON.stringify(param),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async (response) => {
+        if (!response.ok) {
+            const datosError = await response.json();
+            return datosError;
+        }
+        return response.json();
+    })
+}
