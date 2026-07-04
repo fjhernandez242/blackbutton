@@ -5,19 +5,30 @@
             <h5 class="offcanvas-title" id="offcanvasRightLabel"><b>Mi carrito</b></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <!--div class="row ms-4 me-4 text-center" id="btn_mas_info">
-            <p>
-                <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
-                    aria-expanded="false" aria-controls="collapseExample">
-                    ¿Cómo finalizo mi pedido?
+        <div class="row ms-4 me-4 text-center" id="btn_mas_info">
+            <div class="btn-group" role="group">
+                <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS"
+                    aria-expanded="false" aria-controls="collapseS">
+                    ¿Qué es Sobre pedido?
                 </button>
-            </p>
-            <div class="collapse" id="collapseExample">
+                <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseE"
+                    aria-expanded="false" aria-controls="collapseE">
+                    ¿Qué es Entrega inmediata?
+                </button>
+            </div>
+            <div class="collapse" id="collapseS">
                 <div class="card card-body">
-                    Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+                    <h6><b>Sobre pedido:</b></h6>
+                    Son Amigurumis que aún necesitan ser tejidos. El tiempo de espera dependerá de la complejidad del diseño.
                 </div>
             </div>
-        </div-->
+            <div class="collapse" id="collapseE">
+                <div class="card card-body">
+                    <h6><b>Entrega inmediata:</b></h6>
+                    Son Amigurumi que ya estan tejidos y listos para ser enviados.
+                </div>
+            </div>
+        </div>
         <div class="offcanvas-body">
             <div class="card" id="temp_offcanvas">
                 <div class="card-body">
@@ -31,16 +42,6 @@
             <div v-for="producto in productos" class="col-12 col-sm-12 mb-2 d-flex justify-content-center">
                 <div class="card h-100" id="cardCarrito">
                     <div class="card-body">
-                        <div class="row justify-content-end align-content-end">
-                            <div class="col-2 d-flex justify-content-end">
-                                <span v-if="producto.quantity > 1"
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ producto.quantity }}
-                                    <span class="visually-hidden">Productos en carrito</span>
-                                </span>
-                            </div>
-                            <button type="button" class="btn-close translate-middle" @click="deleteProduct(producto.id, producto.tipo_entrega)" aria-label="Close"></button>
-                        </div>
                         <div class="row">
                             <div class="col-4">
                                 <div class="container-img">
@@ -63,13 +64,32 @@
                                             <i class="bi bi-rulers pe-1"></i>{{ producto.dimensiones }} cm
                                         </small>
                                     </li>
+                                    <li class="text-end">
+                                        <div class="conteoProductos">
+                                            <button class="btn" @click="deleteProduct(producto.id, producto.tipo_entrega)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                    <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+                                                </svg>
+                                            </button>
+                                            <small class="text-center">{{ producto.quantity }}</small>
+                                            <button class="btn" @click="addTopCart(producto)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer badge bg-warning text-dark" style="font-size: 13px;">
+                    <div class="card-footer badge text-dark" style="font-size: 13px;"
+                    :class="[producto.tipo_entrega == 1 ? 'styleEntrega' : 'stylePedido']">
                         <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
                         <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
+                        <!-- Despliegue de información -->
                     </div>
                 </div>
             </div>
@@ -195,6 +215,37 @@
         mostrarModal.value = false;
         ticketVenta.value = '';
     }
+
+    // Función para aumentar la cantidad de productos
+    const addTopCart = (params) => {
+        const producto = {
+            'id': params.id,
+            'producto': params.producto,
+            'precio': params.precio,
+            'dimensiones': params.dimensiones,
+            'tipo_entrega': params.tipo_entrega
+        }
+        cartStore.addItem(producto, 1);
+        if (params.tipo_entrega == 1) {
+
+            console.log(cartStore.items);
+
+        }
+        // ID del temporizador
+        // const idSearch = tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
+        // const cantidad = $('#'+ idSearch + id).val();
+        // if (tipo_entrega == 1) {
+        //     $('#'+ idSearch + id).val('1');
+        //     if (!cartStore.expiracion.id_temp) {
+        //         infoTiempo();
+        //     }
+        //     ctrlInventario(params, cantidad);
+        // } else {
+        //     $('#'+ idSearch + params.id).val('1');
+        // }
+        // cartStore.addItem(params, cantidad);
+        // $('.overlay-spinner').hide();
+    };
 </script>
 
 <style scoped>
@@ -277,13 +328,14 @@
         box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 
-    #btn_mas_info p button {
+    #btn_mas_info button {
         background-color: white;
-        box-shadow: 0 7px 25px rgb(181, 52, 113);
         font-weight: bold;
+        margin-bottom: 7px;
+        border: 1px solid rgba(0, 0, 0, 0.432);
     }
 
-    #btn_mas_info p button:hover {
+    #btn_mas_info button:hover {
         color: white;
         background-color: rgb(181, 52, 113);
     }
@@ -295,5 +347,47 @@
 
     #btn_mas_info .card {
         box-shadow: 0 7px 25px rgb(181, 52, 113);
+        margin-bottom: 5px;
+    }
+
+    .stylePedido {
+        background-color: #c46cf0d8;
+    }
+
+    .stylePedido .collapse {
+        margin-top: 5px;
+    }
+
+    #collapseE .card h6 {
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
+    .stylePedido .card span {
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
+    .styleEntrega {
+        background-color: #528ad4;
+    }
+
+    .styleEntrega .collapse {
+        margin-top: 5px;
+    }
+
+    #collapseS .card h6 {
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
+    .styleEntrega .card span {
+        text-shadow: 0 7px 15px rgb(19, 104, 214);
+    }
+
+    .conteoProductos small {
+        border: 1px solid grey;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-inline: 20px;
+        border-radius: 5px;
+        font-weight: bold;
     }
 </style>

@@ -61,8 +61,8 @@
                                                     <div class="row">
                                                         <div class="d-flex justify-content-center">
                                                             <small>
-                                                                Copiamos el ticket a tu portapapeles. Te redirigiremos a la página oficial de BlackButton en Facebook
-                                                                para que puedas iniciar el chat y simplemente pegar tu pedido.
+                                                                Copiamos el ticket a tu portapapeles. Te redirigiremos a chat de Messenger de la página oficial de BlackButton,
+                                                                para que puedas simplemente pegar tu pedido.
                                                             </small>
                                                         </div>
                                                     </div>
@@ -131,15 +131,8 @@
     const copiado = ref(false);
     const copiarAlPortapapeles = async () => {
         try {
+            console.log('entra');
             await navigator.clipboard.writeText(props.ticket);
-
-            // Se cambia el estado a verdadedo
-            copiado.value = true;
-            accionadoCopiado.value = true;
-            // Regresamos el botón a su estado original despés de 2 segundos
-            setTimeout(() => {
-                copiado.value = false;
-            }, 2000);
         } catch (err) {
             console.error('Error al copiar el texto: ', err);
         }
@@ -158,21 +151,24 @@
             envioseleccionado.value = false;
             return;
         }
-        // Se llama la función de copiar a portapapeles si esta no ha sido accionada
-        if (!accionadoCopiado.value) {
-            copiarAlPortapapeles();
-        }
-        const data = cartStore.items;
+        // Copia el ticket al portapapeles
+        await copiarAlPortapapeles();
+        // Se crea la ventana vacía inmediatamente al clic
+        const nuevaVentana = window.open('','_blank');
         try {
+            // Se llama la función de copiar a portapapeles si esta no ha sido accionada
+            const data = cartStore.items;
             const response = await agregarPedido(data, cartStore.expiracion.id_temp, props.codigo);
             if (response.error) {
                 alertas.alertError(response.error);
             } else {
                 if (v_modoenvio.value == 'whatsapp') {
                     // Llama la función para envio de mensaje por WhatsApp
-                    sendMessage(props.ticket, false, true);
+                    const urlWharsapp = sendMessage(props.ticket, false, true);
+                    nuevaVentana.location.href = urlWharsapp;
                 } else if (v_modoenvio.value == 'facebook') {
-                    window.open("https://www.facebook.com/share/1CS1VTt2wB/","_blank")
+                    // nuevaVentana.location.href = "https://www.facebook.com/share/1CS1VTt2wB/";
+                    nuevaVentana.location.href = "https://m.me/BlackButtonn";
                 }
                 $('#temp_offcanvas').fadeOut();
                 $('#temporizador').fadeOut();

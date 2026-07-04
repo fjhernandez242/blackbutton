@@ -4,7 +4,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 d-flex justify-content-end">
-                    <button class="btn btn-sm" @click="cerradoDeSesion()">Cerrar Sesión</button>
+                    <button class="btn btn-sm" @click="logout()">Cerrar Sesión</button>
                 </div>
             </div>
             <div class="row w-50 text-start d-flex align-items-center" id="filtroIndicadores">
@@ -498,32 +498,32 @@
     };// Llama los archivos al iniciar la página
 
     // Función para el cerrado de sesion
-    async function cerradoDeSesion() {
+    async function logout() {
         const params = {
             'user': localStorage.getItem('admin_user'),
             'token': localStorage.getItem('admin_token')
         };
         $('.overlay-spinner').show();
-        cerrarSesion(params).then(
-            (response) => {
-                $('.overlay-spinner').hide();
+        try {
+            const response = await cerrarSesion(params);
 
-                if (response.error) {
-                    alertas.alertError(response.error);
-                } else if (response.detail) {
-                    alertas.alertError(response.detail);
-                } else {
-                    localStorage.removeItem('admin_token');
-                    localStorage.removeItem('admin_token_expires');
-
-                    router.push('login_panel');
-                }
+            if (response.error) {
+                alertas.alertError(response.error);
+            } else if (response.detail) {
+                alertas.alertError(response.detail);
             }
-        ).catch(error => {
+        } catch (error) {
+            console.log('No fue posible cerrar sesión en el servidor: ', error);
+            alertas.alertError('Sesión local finalizada (Servidor no disponible).');
+        } finally {
+            // Este bloque siempre se ejecuta (falle o tenga éxito la petición)
             $('.overlay-spinner').hide();
-            console.log("No fue posible cerrar sesión: ", error);
-            alertas.alertError('No fue posible cerrar sesión');
-        });
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_token_expires');
+            // localStorage.removeItem('admin_user');
+
+            router.push('login_panel');
+        }
     }
     // Función para filtrar busqueda de pedido
     async function filtrar(filtro) {

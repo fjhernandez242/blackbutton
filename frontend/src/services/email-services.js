@@ -55,8 +55,8 @@ export const sendMessage = (code, imprimir = false, reimpresion = false) => {
         return mensaje;
     }
     const url = `https://api.whatsapp.com/send?phone=${numberWhatsapp}&text=${encodeURIComponent(mensaje)}`;
-    window.open(url, "_black");
+    // window.open(url, "_black");
 
-    return null;
+    return url;
 
 };

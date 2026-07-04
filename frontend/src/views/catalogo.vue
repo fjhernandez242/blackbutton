@@ -68,20 +68,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer badge text-dark footerInfo">
-                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_e`" aria-expanded="false" :aria-controls="`collapse_${producto.id}_e`"
-                                 v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
+                            <div class="card-footer badge text-dark footerInfo" :class="[producto.tipo_entrega == 1 ? 'styleEntrega' : 'stylePedido']">
+                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_e`" aria-expanded="false"
+                                :aria-controls="`collapse_${producto.id}_e`"
+                                 v-if="producto.tipo_entrega == 1"><b>Entrega inmediata <i class="bi bi-info-circle"></i></b></small>
 
-                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_p`" aria-expanded="false" :aria-controls="`collapse_${producto.id}_p`"
-                                v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
+                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_p`" aria-expanded="false"
+                                :aria-controls="`collapse_${producto.id}_p`"
+                                v-if="producto.tipo_entrega == 2"><b>Sobre pedido <i class="bi bi-info-circle"></i></b></small>
                                 <div class="collapse" :id="`collapse_${producto.id}_e`">
                                     <div class="card card-body">
-                                        <span style="font-size: 15px;">Amigurumi listo para su envío</span>
+                                        <span style="font-size: 15px;"
+                                        class="text-wrap">Amigurumi tejido y listo para su envío</span>
                                     </div>
                                 </div>
                                 <div class="collapse" :id="`collapse_${producto.id}_p`">
                                     <div class="card card-body">
-                                        <span style="font-size: 15px;">Amigurumi que debe ser tejidos</span>
+                                        <span style="font-size: 15px;"
+                                        class="text-wrap">Amigurumi que áun debe ser tejido.</span>
                                     </div>
                                 </div>
                             </div>
@@ -388,6 +392,30 @@
 
     .titleProd {
         height: 5rem;
+    }
+
+    .stylePedido {
+        background-color: #c46cf0d8;
+    }
+
+    .stylePedido .collapse {
+        margin-top: 5px;
+    }
+
+    .stylePedido .card span {
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
+    }
+
+    .styleEntrega {
+        background-color: #528ad4;
+    }
+
+    .styleEntrega .collapse {
+        margin-top: 5px;
+    }
+
+    .styleEntrega .card span {
+        text-shadow: 0 7px 15px rgb(19, 104, 214);
     }
 
     /** media */

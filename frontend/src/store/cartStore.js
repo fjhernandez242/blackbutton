@@ -48,7 +48,13 @@ export const useCartStore = defineStore('cart', {
 
             if (existingItem) {
                 // Si el producto ya existe, solo aumentamos la cantidad
-                existingItem.quantity = parseInt(existingItem.quantity) + parseInt(cantidad);
+                const suma = parseInt(existingItem.quantity) + parseInt(cantidad);
+                // Mantiene un tope de 5 poductos por pedido
+                if (suma <= 5) {
+                    existingItem.quantity = suma;
+                }
+
+
             } else {
                 // Si es un producto nuevo, lo agregamos con quantity: 1
                 this.items.push({
