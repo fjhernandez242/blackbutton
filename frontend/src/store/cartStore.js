@@ -115,6 +115,7 @@ export const useCartStore = defineStore('cart', {
                 clearInterval(this.intervalo);
             }
 
+            // this.detenerTemporizador();
             this.intervalo = setInterval(() => {
                 // console.log('entra');
                 // console.log(this.expiracion.time_expira);

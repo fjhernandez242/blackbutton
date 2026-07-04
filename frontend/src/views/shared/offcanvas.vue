@@ -5,36 +5,20 @@
             <h5 class="offcanvas-title" id="offcanvasRightLabel"><b>Mi carrito</b></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
+        <!--div class="row ms-4 me-4 text-center" id="btn_mas_info">
+            <p>
+                <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
+                    aria-expanded="false" aria-controls="collapseExample">
+                    ¿Cómo finalizo mi pedido?
+                </button>
+            </p>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+                </div>
+            </div>
+        </div-->
         <div class="offcanvas-body">
-            <!-- información -->
-             <div id="info" v-if="cartStore.totalItemsCount != 0">
-                 <p class="d-flex">
-                     <!-- Botón para información de envio de producto -->
-                     <button class="btn collapseBtnInfo" type="button" data-bs-toggle="collapse" data-bs-target="#infoEnvio"
-                         aria-expanded="false" aria-controls="infoEnvio">
-                         <b>¿Cómo llega mi producto?</b>
-                     </button>
-                     <!-- Botón para información de forma de pago -->
-                     <button class="btn collapseBtnInfo" type="button" data-bs-toggle="collapse" data-bs-target="#infoPago"
-                         aria-expanded="false" aria-controls="infoPago">
-                         <b>¿Cómo finalizo mi pedido?</b>
-                     </button>
-                 </p>
-                 <!-- información para envio de productos-->
-                 <div class="collapse" id="infoEnvio">
-                     <div class="card card-body mb-2">
-                         Se hace envios a toda la Republica Méxicana, el envio se realiza por
-                         medio de Correos de México.
-                     </div>
-                 </div>
-                 <!-- Información para forma de pago -->
-                 <div class="collapse" id="infoPago">
-                     <div class="card card-body mb-2">
-                         El proceso final se realizar con ayuda de WhatsApp, al presionar el botón <b>Completar pedido</b> se te
-                         redirigirá a WhatsApp para que puedas completar tu pedido.
-                     </div>
-                 </div>
-             </div>
             <div class="card" id="temp_offcanvas">
                 <div class="card-body">
                     <small><b>Tiempo de apartado:</b> {{ temp_offcanvas }}</small>
@@ -290,6 +274,26 @@
         margin: 1rem;
         z-index: 1;
         font-size: 20px;
+        box-shadow: 0 7px 25px rgb(181, 52, 113);
+    }
+
+    #btn_mas_info p button {
+        background-color: white;
+        box-shadow: 0 7px 25px rgb(181, 52, 113);
+        font-weight: bold;
+    }
+
+    #btn_mas_info p button:hover {
+        color: white;
+        background-color: rgb(181, 52, 113);
+    }
+
+    .clickInfo {
+        color: white;
+        background-color: rgb(181, 52, 113);
+    }
+
+    #btn_mas_info .card {
         box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 </style>

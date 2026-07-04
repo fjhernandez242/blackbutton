@@ -11,62 +11,79 @@
                     <small>{{ temporizador }}</small>
                 </div>
             </div>
-            <div v-if="catalogo.length" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-1">
+            <div v-if="catalogo.length" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-1">
                 <div v-for="producto in catalogo" :key="producto.id">
                     <div class="col">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <div class="container-img">
-                                    <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
-                                        class="img-fluid" @click="selecProducto(producto.id)" :id="`img_${producto.id}`">
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <h5>{{ producto.producto }}</h5>
-                                <div class="row pb-2">
-                                    <div class="col-md-6 text-start">
-                                        <span>
-                                            <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
-                                        </span>
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        <small>
-                                            <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
-                                        </small>
+                        <div class="card">
+                            <div class="vistaMovil">
+                                <div class="card-header">
+                                    <div class="container-img">
+                                        <img :src="rutaImagen(producto.imagen)" :alt="producto.producto"
+                                            class="img-fluid" @click="selecProducto(producto.id)" :id="`img_${producto.id}`">
                                     </div>
                                 </div>
-                                <div v-if="producto.tipo_entrega == 2">
-                                    <div class="input-group mb-1">
-                                        <span class="input-group-text">Cantidad</span>
-                                        <select class="form-select" :id="`cantProdPed_${producto.id}`">
-                                            <option value="1" selected>1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
+                                <div class="card-body">
+                                    <div class="row titleProd">
+                                        <h5>{{ producto.producto }}</h5>
                                     </div>
-                                </div>
-                                <div v-else>
-                                    <div class="input-group mb-1">
-                                        <label class="input-group-text" for="cantProd">Cantidad</label>
-                                        <select class="form-select" :id="`cantProd_${producto.id}`">
-                                            <option v-for="cantidad in producto.inventario" :value="cantidad">
-                                                {{ cantidad }}
-                                            </option>
-                                        </select>
+                                    <div class="row pb-2">
+                                        <div class="col-6 col-lg-6 col-md-12">
+                                            <span>
+                                                <b><i class="bi bi-currency-dollar"></i>{{ producto.precio }}</b>
+                                            </span>
+                                        </div>
+                                        <div class="col-6 col-lg-6 col-md-12">
+                                            <span>
+                                                <i class="bi bi-rulers pe-1"></i> {{ producto.dimensiones }} cm
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="input-group">
-                                    <button class="btn btn_carrito w-100" @click="addTopCart(producto)">
-                                        <i class="bi bi-cart-plus"></i>
-                                        Agregar a carrito
-                                    </button>
+                                    <div v-if="producto.tipo_entrega == 2">
+                                        <div class="input-group mb-1">
+                                            <span class="input-group-text">Cantidad</span>
+                                            <select class="form-select" :id="`cantProdPed_${producto.id}`">
+                                                <option value="1" selected>1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div v-else>
+                                        <div class="input-group mb-1">
+                                            <label class="input-group-text" for="cantProd">Cantidad</label>
+                                            <select class="form-select" :id="`cantProd_${producto.id}`">
+                                                <option v-for="cantidad in producto.inventario" :value="cantidad">
+                                                    {{ cantidad }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <button class="btn btn_carrito w-100" @click="addTopCart(producto)">
+                                            <i class="bi bi-cart-plus"></i>
+                                            Agregar a carrito
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-footer badge text-dark footerInfo">
-                                <small v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
-                                <small v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
+                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_e`" aria-expanded="false" :aria-controls="`collapse_${producto.id}_e`"
+                                 v-if="producto.tipo_entrega == 1"><b>Entrega inmediata</b></small>
+
+                                <small data-bs-toggle="collapse" :data-bs-target="`#collapse_${producto.id}_p`" aria-expanded="false" :aria-controls="`collapse_${producto.id}_p`"
+                                v-if="producto.tipo_entrega == 2"><b>Sobre pedido</b></small>
+                                <div class="collapse" :id="`collapse_${producto.id}_e`">
+                                    <div class="card card-body">
+                                        <span style="font-size: 15px;">Amigurumi listo para su envío</span>
+                                    </div>
+                                </div>
+                                <div class="collapse" :id="`collapse_${producto.id}_p`">
+                                    <div class="card card-body">
+                                        <span style="font-size: 15px;">Amigurumi que debe ser tejidos</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -265,11 +282,6 @@
         margin-inline: 0.2rem;
     }
 
-    #cardProducto {
-        box-shadow: 0 7px 15px rgb(0 0 0 / 0.2);
-        cursor: pointer;
-    }
-
     .container-img {
         width: 100%;
         max-width: 400px;
@@ -339,11 +351,15 @@
         box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 
+    .footerInfo small {
+        cursor: pointer;
+    }
+
     #temporizador {
         display: none;
         position: fixed;
         right: 0;
-        top: 6rem;
+        top: 8.5rem;
         margin: 1rem;
         z-index: 1;
         box-shadow: 0 7px 25px rgb(181, 52, 113);
@@ -365,8 +381,13 @@
         right: 7rem;
         left: 68rem;
         box-shadow: 0 7px 15px rgb(181, 52, 113);
-        top: 8.3rem;
+        top: 11rem;
         transition: all 0.7ms;
+        background-color: white;
+    }
+
+    .titleProd {
+        height: 5rem;
     }
 
     /** media */
@@ -409,6 +430,35 @@
 
         .container {
             padding-inline: 0.5rem;
+        }
+
+        .vistaMovil {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-direction: column;
+        }
+
+        .container-img {
+            max-width: 80px;
+            height: 150px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .titleProd {
+            height: 3rem;
+        }
+
+        .titleProd h5 {
+            font-size: 17px;
+        }
+
+        span {
+            font-size: 13px;
         }
     }
 

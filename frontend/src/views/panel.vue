@@ -7,7 +7,23 @@
                     <button class="btn btn-sm" @click="cerradoDeSesion()">Cerrar Sesión</button>
                 </div>
             </div>
-            <h4><b>Indicadores</b></h4>
+            <div class="row w-50 text-start d-flex align-items-center" id="filtroIndicadores">
+                <div class="col-12 col-md-6">
+                    <h4><b>Indicadores</b></h4>
+                </div>
+                <div class="col-12 col-md-6 pb-2">
+                    <div class="form-floating">
+                        <select class="form-select" id="indicadorFiltro" aria-label="Floating label select example"
+                            v-model="v_filtro_indicador">
+                            <option value="T" selected>Todos</option>
+                            <option value="H" >Hoy</option>
+                            <option value="E">Este mes</option>
+                            <option value="A">Mes anterior</option>
+                        </select>
+                        <label for="indicadorFiltro">Filtrar indicadores</label>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-lg-4 position-relative">
                     <div class="translate-middle-y" id="icon-cash">
@@ -122,6 +138,12 @@
                     <div v-if="prod_reastreado != ''" >
                         <div class="row mt-3">
                             <div class="col">
+                                <div class="col-12 d-flex justify-content-end mb-2">
+                                    <button type="button" @click="limpiarCampo('tabla')" class="btn"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Limpiar busqueda">
+                                        Limpiar
+                                    </button>
+                                </div>
                                 <div v-for="(ventas, fecha) in prod_reastreado" :key="fecha" class="card mb-2">
                                     <div class="card-header">
                                         <b>Fecha:</b> {{ fecha }}
@@ -192,7 +214,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="col-12 d-flex justify-content-end">
                                     <button type="button" @click="limpiarCampo('tabla')" class="btn"
                                         data-bs-toggle="tooltip" data-bs-placement="top" title="Limpiar busqueda">
@@ -255,7 +276,9 @@
                             <div class="input-group has-validation">
                                 <span class="input-group-text"><i class="bi bi-alphabet-uppercase"></i></span>
                                 <input type="text" class="form-control limpiarCampo" name="producto" id="producto"
-                                    v-model="v_producto" placeholder="Nombre" required :disabled="!elementoActEdit">
+                                    v-model="v_producto" placeholder="Nombre" required :disabled="!elementoActEdit"
+                                    :class="[nombreLargo ? 'borderRed' : '']">
+                                <span id="msgNombre" v-if="nombreLargo">El nombre es muy lago</span>
                                 <div class="invalid-feedback">
                                 Por favor indica su nombre!
                                 </div>
@@ -377,7 +400,7 @@
     // Escucha el cambio del tipo de producto
     onMounted(() => {
         // Recarga de catalogo
-        obtenerConteoVentas({'periodo': 'actual'});
+        obtenerConteoVentas({'periodo': 'T'});
     });
     // Función para rastrear produto
     async function rastrearProducto() {
@@ -451,7 +474,7 @@
             );
         }
         $('.overlay-spinner').hide();
-        obtenerConteoVentas({'periodo': 'actual'});
+        obtenerConteoVentas({'periodo': 'T'});
     }
     const formatearMoneda = (valor) => {
         if (valor == null) return '$0.00';
@@ -539,6 +562,7 @@
     const v_escogeEdicion = ref('0');
     const catalogo = ref({});
     const v_prod_select = ref({});
+    const nombreLargo = ref(false);
 
     const cambioProceso = async (proceso) => {
         if (proceso == 'agregar') {
@@ -560,7 +584,6 @@
     };
 
     const obtieneProductos = async () => {
-        console.log('entra');
         $('.overlay-spinner').show();
         await getProductos(
             {'cambioTipo': 0, 'todos': true}
@@ -575,22 +598,33 @@
 
         $('.overlay-spinner').hide();
     }
-
+    // Escucha cuando se elige el cambio a edición
     watch(() => v_escogeEdicion.value, (val) => {
-        catalogo.value.forEach( function(element, index, array) {
-            if (element.id == val) {
-                elementoActEdit.value = true;
-                v_prod_select.value = element;
-                v_producto.value = element.producto;
-                v_precio .value = element.precio;
-                v_dimensiones .value = element.dimensiones;
-                v_disponible.value = element.tipo_entrega;
-                v_inventario .value = element.inventario;
-                v_comentario.value = element.comentario;
-                v_estado.value = element.estado;
-                return true;
-            }
-        });
+        let arrCatalogo = catalogo.value;
+        if (arrCatalogo.length > 0) {
+            catalogo.value.forEach( function(element, index, array) {
+                if (element.id == val) {
+                    elementoActEdit.value = true;
+                    v_prod_select.value = element;
+                    v_producto.value = element.producto;
+                    v_precio .value = String(element.precio).replace(',','.');
+                    v_dimensiones .value = String(element.dimensiones).replace(',','.');
+                    v_disponible.value = element.tipo_entrega;
+                    v_inventario .value = String(element.inventario).replace(',','.');
+                    v_comentario.value = element.comentario;
+                    v_estado.value = element.estado;
+                    return true;
+                }
+            });
+        }
+    });
+    // Escucha el ingreso de datos al campo de nombre
+    watch(() => v_producto.value, (val) => {
+        if (val.length > 30) {
+            nombreLargo.value = true;
+        } else {
+            nombreLargo.value = false;
+        }
     });
     // Contruye la ruta de la imagen
     const rutaImagen = (urlRelativa) => {
@@ -629,11 +663,13 @@
     }
     // Función para agregar un nuevo producto
     async function nuevoProducto() {
+        if (nombreLargo.value === true) {
+            alertas.alertWarning('El nombre del producto es demasiado grande', false, 3000);
+            return;
+        }
         $('.overlay-spinner').show();
-
         const camposCompletos = ref(true);
         enviando.value = true;
-
         const producto = {
             "producto": v_producto.value,
             "precio": v_precio.value,
@@ -695,6 +731,7 @@
                             enviando.value = false;
                             limpiarCampo('add');
                             elementoActEdit.value = false;
+                            obtieneProductos();
                             alertas.alertSuccess(getErrorMessages(201));
                         }
                     }
@@ -717,6 +754,12 @@
         }
         $('.overlay-spinner').hide();
     }
+
+    // Funciones para el filtrado de indicadores
+    const v_filtro_indicador = ref('T');
+    watch(() => v_filtro_indicador.value, (val) => {
+        obtenerConteoVentas({'periodo': val});
+    });
 </script>
 
 <style scoped>
@@ -810,6 +853,17 @@
         border-radius: 15px;
     }
 
+    .borderRed {
+        border: 1px solid red;
+    }
+
+    #msgNombre {
+        position: absolute;
+        top: -2rem;
+        left: 15rem;
+        color: red;
+    }
+
     /** media */
     @media (max-width: 1400px) {
         #icon-cash,
@@ -859,6 +913,10 @@
         #icon-top {
             left: 15rem !important;
         }
+
+        #filtroIndicadores {
+            max-width: 100%;
+        }
     }
 
     @media (max-width: 380px) {
@@ -875,6 +933,10 @@
 
         .img_ref_edit {
             max-width: 50%;
+        }
+
+        #filtroIndicadores {
+            max-width: 100%;
         }
     }
 

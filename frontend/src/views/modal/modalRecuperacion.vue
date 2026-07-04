@@ -128,7 +128,6 @@
                             alertas.alertError(response.error);
                             setTimeout(() => modalClose(), 1000);
                         } else if (response.mensaje == 'inexistente') {
-                            console.log('entra');
                             alertas.alertError(response.error);
                             return;
                         }

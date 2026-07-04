@@ -98,7 +98,7 @@ def enviar_codigo(request):
         exist_code_active.update(estado='U')
 
     # Inicia el proceso de creación y envio del nuevo código
-    import smtplib, secrets, os
+    import smtplib, secrets
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
     from django.conf import settings

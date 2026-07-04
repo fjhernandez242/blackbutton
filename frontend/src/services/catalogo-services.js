@@ -108,16 +108,21 @@ export function productoById(id) {
     )
 }
 // Agrega un nuevo pedido
-export function agregarPedido(params, codigo_temp) {
+export function agregarPedido(params, codigo_temp, pedido) {
     return fetch(URLS.AGREGAR_PEDIDO, {
         method: 'POST',
         body: JSON.stringify({
-            'id': params.id,
-            'cantidad': params.quantity,
-            'tipo_entrega': params.tipo_entrega,
+            'datos': params,
             'codigo_temp': codigo_temp,
-            'pedido': params.pedido
+            'pedido': pedido
         }),
+        // body: JSON.stringify({
+        //     'id': params.id,
+        //     'cantidad': params.quantity,
+        //     'tipo_entrega': params.tipo_entrega,
+        //     'codigo_temp': codigo_temp,
+        //     'pedido': params.pedido
+        // }),
         headers: {
             'Content-Type': 'application/json'
         }

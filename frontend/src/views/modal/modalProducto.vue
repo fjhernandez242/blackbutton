@@ -38,7 +38,7 @@
                                                     </th>
                                                     <th>{{ v_disponible }}</th>
                                                 </tr>
-                                                <tr>
+                                                <tr v-if="v_disponible.value == 'Inmediata'">
                                                     <th>
                                                         <i class="bi bi-box-seam-fill pe-1"></i>
                                                         <label for="stock">Stock: </label>

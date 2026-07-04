@@ -9,7 +9,7 @@ from rest_framework.authentication import TokenAuthentication
 
 from .models import catalogo_model, pedidos_model, cookietem_header_model, cookietem_body_model
 from django.utils import timezone
-from datetime import timedelta, datetime, time
+from datetime import timedelta, date
 
 from .forms import CatalogoForm
 from django.db.models import Q, F, Count
@@ -218,9 +218,40 @@ def cambioEstadoVenta(request):
     try:
         # Cambia a estado Completado todos los registros con el codigo de venta indicado
         if data['estado'] == 'completar':
+            # Se indica el estado para cambio en el pedido
             estadoNumero = 2
         else:
+            # Acciones en secuencia para cuando es cancelado un pedido
+            for pedido in exist_pedido:
+                if pedido.codigo_temp != '':
+                    # Buscamos la información de los productos apartados
+                    apartados_body = cookietem_body_model.objects.filter(id_codigo=pedido.codigo_temp)
+                    for apartado in apartados_body:
+                        producto = catalogo_model.objects.filter(id=apartado.producto_id).first()
+                        if not producto:
+                            return Response({'error': 'No se logró cancelar el peddido; no se encontró el producto'}, status=status.HTTP_400_BAD_REQUEST)
+                        # Si se encuentra el producto que cambio de tipo, se regreda a tipo "Entrega inmediata"
+                        if producto.tipo_entrega == 2 and producto.inventario == 0:
+                            producto.tipo_entrega = 1
+                        # Le suma la cantidad de productos que habían sido aparatados
+                        producto.inventario = producto.inventario + apartado.cantidad_prod
+                        producto.save()
+            # Se indica el estado para cambio en el pedido
             estadoNumero = 3
+        # Acciones en secuencia para completar el pedido
+        # Si hay un código temporal, se rastrea y se elimina
+        try:
+            for pedido in exist_pedido:
+                if pedido.codigo_temp != '':
+                    # Elimina el código temporal de la cabecera
+                    cookietem_header_model.objects.filter(codigo_temp=pedido.codigo_temp).delete()
+                    # Elimina los códigos temporales que puedan haber en el body
+                    apartados_body = cookietem_body_model.objects.filter(id_codigo=pedido.codigo_temp)
+                    for apartado in apartados_body:
+                        apartado.delete()
+        except Exception as e:
+            return Response({'error': 'No se logró completar el pedido: ' + e}, status=status.HTTP_400_BAD_REQUEST)
+        # Realiza el cambio de estadi en el pedido
         exist_pedido.update(estado=estadoNumero)
     except:
         return Response({'error': 'No se pudo completar la venta'}, status=status.HTTP_400_BAD_REQUEST)
@@ -240,25 +271,54 @@ def calculoMovimientos(request):
         'ventas_completas': 0,
         'ventas_canceladas': 0
     })
+    # Obtenemos la fecha actual
+    ahora = timezone.localtime(timezone.now()).date()
+    # Manejo de periodo segun filtro
+    inicio_mes_actual = ahora.replace(day=1)
+    if data['periodo'] == 'H': # Filtra para el día actual
+        # Reliza el filtrado
+        filtrado_periodo = pedidos_model.objects.filter(fecha_venta__gte=ahora)
+    elif data['periodo'] == 'E': # Filtra para este mes
+        if inicio_mes_actual.month == 12:
+            fini_mes_siguiente = date(inicio_mes_actual.year + 1, 1, 1)
+        else:
+            fini_mes_siguiente = inicio_mes_actual.replace(month=inicio_mes_actual.month + 1, day=1)
+        fin_mes_actual = fini_mes_siguiente - timedelta(days=1)
 
-    estadisticas_ventas = pedidos_model.objects.aggregate(
-        # Cuenta los 'codigo_venta' unicos donde el estado es 1
-        proceso = Count('codigo_venta',filter=Q(estado=1),distinct=True),
+        # Reliza el filtrado
+        filtrado_periodo = pedidos_model.objects.filter(fecha_venta__range=[inicio_mes_actual, fin_mes_actual])
+
+    elif data['periodo'] == 'A': # Filtra para mes anterior
+        ffin_mes_anterior = inicio_mes_actual - timedelta(days=1)
+
+        fini_mes_anterior = ffin_mes_anterior.replace(day=1)
+
+        # Reliza el filtrado
+        filtrado_periodo = pedidos_model.objects.filter(fecha_venta__range=[fini_mes_anterior, ffin_mes_anterior])
+    elif data['periodo'] == 'T': # Muestra todos los registros
+        filtrado_periodo = pedidos_model.objects.all()
+
+    # Con la información filtrada, se realiza el conteo de ventas
+    estadisticas_ventas = filtrado_periodo.aggregate(
         # Cuenta los 'codigo_venta' unicos donde el estado es 2
         completas = Count('codigo_venta',filter=Q(estado=2),distinct=True),
         # Cuenta los 'codigo_venta' unicos donde el estado es 3
         canceladas = Count('codigo_venta',filter=Q(estado=3),distinct=True)
     )
 
+    # Calcula todas los procesos en estado 1
+    estadisticas_en_proceso = pedidos_model.objects.aggregate(
+        # Cuenta los 'codigo_venta' unicos donde el estado es 1
+        proceso = Count('codigo_venta',filter=Q(estado=1),distinct=True),
+    )
+
     return Response({
-        'ventas_proceso': estadisticas_ventas['proceso'],
+        'ventas_proceso': estadisticas_en_proceso['proceso'],
         'ventas_completas': estadisticas_ventas['completas'],
         'ventas_canceladas': estadisticas_ventas['canceladas']
     })
 
 @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
 def getProductoById(request):
     data = request.data
 
@@ -274,32 +334,39 @@ def getProductoById(request):
 @api_view(['POST'])
 def agregar_pedido(request):
     data = request.data
-    existe_producto = catalogo_model.objects.get(id=data['id'])
-    if not existe_producto:
-        return Response({"error", "No se encontró el producto" }, status=status.HTTP_404_NOT_FOUND)
-    # Revisa que no venga un codigo de pedido
-    if data['pedido'] == '':
-        # Se crea el código de venta si no viene uno
-        code_pedido = genera_codigo_venta()
-    else:
-        # Se agrega el código de venta si viene
-        code_pedido = data['pedido']
-    # | MÉTODO DE SEGURIDAD | Si no es posible generar el código, termina el proceso
-    if not code_pedido:
-        return Response({"error", "No fue posible agregar el pedido"}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        pedidos_model.objects.create(
-            codigo_venta = code_pedido,
-            codigo_temp = data['codigo_temp'],
-            id_producto = data['id'],
-            cantidad_vendida = data['cantidad'],
-            tipo_entrega = data['tipo_entrega'],
-            estado = 1,
-            fecha_venta = timezone.localdate()
-        )
+        # Revisa que no venga un codigo de pedido
+        if data['pedido'] == '':
+            # Se crea el código de venta si no viene uno
+            code_pedido = genera_codigo_venta()
+        else:
+            # Se agrega el código de venta si viene
+            code_pedido = data['pedido']
+        for pedido in data.get('datos'):
+            existe_producto = catalogo_model.objects.get(id=pedido['id'])
+            if not existe_producto:
+                return Response({"error", "No se encontró el producto" }, status=status.HTTP_404_NOT_FOUND)
+
+            # | MÉTODO DE SEGURIDAD | Si no es posible generar el código, termina el proceso
+            if not code_pedido:
+                return Response({"error", "No fue posible agregar el pedido"}, status=status.HTTP_400_BAD_REQUEST)
+            if pedido['tipo_entrega'] == 1:
+                dato_temp = data['codigo_temp']
+            else:
+                dato_temp = ''
+            pedidos_model.objects.create(
+                codigo_venta = code_pedido,
+                codigo_temp = dato_temp,
+                id_producto = pedido['id'],
+                cantidad_vendida = pedido['quantity'],
+                tipo_entrega = pedido['tipo_entrega'],
+                estado = 1,
+                fecha_venta = timezone.localdate()
+            )
         return Response({ "success": "Pedido cargado", "code": code_pedido }, status=status.HTTP_200_OK)
-    except:
-        return Response({ "error": "Algo salio mal al cargar el pedido" })
+    except Exception as e:
+        print(e)
+        return Response({ "error": "Algo salio mal al cargar el pedido: " })
 
 @api_view(['POST'])
 def setterProducto(request):
@@ -330,8 +397,8 @@ def setterProducto(request):
         if not apartados.exists():
             return Response({"error": "No se encontró el apartado"}, status=status.HTTP_400_BAD_REQUEST)
         # Revisa que no se haya completado el pedido aún
-        existe_pedido = pedidos_model.objects.filter(codigo_temp=data['codigo_temp'])
-        if not existe_pedido.exists():
+        existe_pedido = pedidos_model.objects.filter(codigo_temp=data['codigo_temp']).first()
+        if not existe_pedido or existe_pedido.estado != '1':
             for apartado in apartados:
                 catalogo = catalogo_model.objects.filter(id=apartado.producto_id).first()
                 if not data.get('id_prod'):
@@ -340,27 +407,27 @@ def setterProducto(request):
                     suma = 1
                 nueva_cantidad = catalogo.inventario + suma
                 try:
+                    # Actualiza catalogo
+                    # Revisa el tipo de entrega
+                    if catalogo.tipo_entrega == 2:
+                        # Valida si aún productos en apartados
+                        existe_ref_apartado = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
+                        if existe_ref_apartado.exists():
+                            # Si ya no hay apartados, y estos son regresados, se actualiza el tipo de entrega
+                            catalogo.tipo_entrega = 1
+                    catalogo.inventario = nueva_cantidad
+                    catalogo.save()
                     # Actualiza apartado
                     if not data.get('id_prod'):
                         apartado.delete()
                     else:
                         if (apartado.producto_id == data['id_prod']):
                             if apartado.cantidad_prod == 1:
-                                apartado.cantidad_prod = apartado.cantidad_prod - 1
+                                # apartado.cantidad_prod = apartado.cantidad_prod - 1
                                 apartado.delete()
                             else:
                                 apartado.cantidad_prod = apartado.cantidad_prod - 1
                                 apartado.save()
-                    # Actualiza catalogo
-                    # Revisa el tipo de entrega
-                    if catalogo.tipo_entrega == 2:
-                        # Valida si aún productos en apartados
-                        existe_ref_apartado = cookietem_body_model.objects.filter(id_codigo=data['codigo_temp'])
-                        if not existe_ref_apartado.exists():
-                            # Si ya no hay apartados, y estos son regresados, se actualiza el tipo de entrega
-                            catalogo.tipo_entrega = 1
-                    catalogo.inventario = nueva_cantidad
-                    catalogo.save()
                 except:
                     return Response({"error": "No fue posible actualiar el producto"}, status=status.HTTP_400_BAD_REQUEST)
             try:
