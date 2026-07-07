@@ -64,8 +64,8 @@
                                                     <div class="row">
                                                         <div class="d-flex justify-content-center">
                                                             <small>
-                                                                Copiamos el ticket a tu portapapeles. Te redirigiremos a chat de Messenger de la página oficial de BlackButton,
-                                                                para que puedas simplemente pegar tu pedido.
+                                                                Copiamos el ticket a tu portapapeles. Te redirigiremos a la página oficial de BlackButton,
+                                                                para que puedas simplemente iniciar un chat, pegar y enviar tu pedido.
                                                             </small>
                                                         </div>
                                                     </div>
@@ -111,25 +111,31 @@
                                                             <ol class="list-group list-group-numbered">
                                                                 <li class="list-group-item" style="border-radius: 15px;">
                                                                     <small>
-                                                                        Revisa que el ticket esté en tu portapeletes, o vuelve a copiarlo en la sección de <b>Ticket</b>.
+                                                                        Revisa que el ticket esté en tu portapapeles, o vuelve a copiarlo en la sección de <b>Ticket</b>.
                                                                     </small>
                                                                 </li>
                                                                 <li class="list-group-item mt-2" style="border-radius: 15px;">
                                                                     <small>
-                                                                        Ve a la página oficial de Black Button en Facebook, inicia un chat con la vendedora,
-                                                                        pega y envía el ticket que ya copiaste anteriormente.
+                                                                        Ve a la página oficial de BlackButton en Facebook, inicia un chat, pega y
+                                                                        envía el ticket que ya copiaste anteriormente.
                                                                     </small>
-                                                                    <div class="m-2 d-flex justify-content-center">
-                                                                        <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="form-check-label" for="inlineRadio2" id="btn_pedido_face">
-                                                                            <span class="me-2">BlackButton</span>
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-                                                                                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
-                                                                            </svg>
-                                                                        </a>
-                                                                    </div>
                                                                 </li>
                                                             </ol>
                                                         </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <small>
+                                                        <b>Nota:</b> También puedes dar clic en la opción de abajo para que se te redirija a la página
+                                                        oficial.
+                                                    </small>
+                                                    <div class="m-2 d-flex justify-content-center">
+                                                        <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="form-check-label" for="inlineRadio2" id="btn_pedido_face">
+                                                            <span class="me-2">BlackButton</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                                                                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                                                            </svg>
+                                                        </a>
                                                     </div>
                                                 </li>
                                             </ul>
@@ -247,7 +253,8 @@
                     nuevaVentana.location.href = urlWharsapp;
                 } else if (v_modoenvio.value == 'facebook') {
                     // nuevaVentana.location.href = "https://www.facebook.com/share/1CS1VTt2wB/";
-                    nuevaVentana.location.href = "https://m.me/BlackButtonn";
+                    // nuevaVentana.location.href = "https://m.me/BlackButtonn";
+                    nuevaVentana.location.href = "https://www.facebook.com/BlackButtonn";
                 }
                 // Detenemos el temporizador que pueda haber
                 $('#temp_offcanvas').fadeOut();

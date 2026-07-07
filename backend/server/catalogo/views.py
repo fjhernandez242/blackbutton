@@ -135,20 +135,20 @@ def getPedidoByClave(request):
     elif data.get('tipo') == 'fecha':
         if not data.get('filtro'):
             if not data.get('dato')['fini']:
-                get_pedido = pedidos_model.objects.filter(fecha_venta=data['dato'])
+                get_pedido = pedidos_model.objects.filter(fecha_venta=data['dato']).order_by('-id')
             else:
-                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(data.get('dato')['fini'], data.get('dato')['ffin']))
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(data.get('dato')['fini'], data.get('dato')['ffin'])).order_by('-id')
         elif data.get('filtro'):
             hoy = timezone.localdate()
             anio = hoy.year
             mes = hoy.month
             if data.get('dato') == 'h':
-                get_pedido = pedidos_model.objects.filter(fecha_venta=hoy)
+                get_pedido = pedidos_model.objects.filter(fecha_venta=hoy).order_by('-id')
             elif data.get('dato') == 'e':
                 _, ultimo_dia = calendar.monthrange(anio, mes)
                 mes_inicio = hoy.replace(day=1)
                 mes_ultimo = hoy.replace(day=ultimo_dia)
-                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(mes_inicio, mes_ultimo))
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(mes_inicio, mes_ultimo)).order_by('-id')
             elif data.get('dato') == 'a':
                 primer_dia_mes_actual = hoy.replace(day=1)
                 fecha_mes_anterior = primer_dia_mes_actual - timedelta(days=1)
@@ -158,7 +158,7 @@ def getPedidoByClave(request):
                 primer_dia_final = fecha_mes_anterior.replace(day=1)
                 ultimo_dia_final = fecha_mes_anterior.replace(day=ultimo_dia)
 
-                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(primer_dia_final, ultimo_dia_final))
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(primer_dia_final, ultimo_dia_final)).order_by('-id')
 
     if get_pedido is None:
         return Response({"error": "No se proporciono una clave o fecha valida para la búsqueda"}, status=status.HTTP_200_OK)
