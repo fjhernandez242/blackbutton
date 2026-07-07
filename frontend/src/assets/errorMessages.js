@@ -3,7 +3,7 @@ export const ERROR_MESSAGES = {
     101: "Campos faltantes",
     102: "El valor del producto debe ser mayor de 0",
     103: "Las dimensiones del producto deben ser mayor de 0",
-    104: "Debes agregar la clave o fecha del pedido",
+    104: "Debes agregar la clave o un rango de fechas",
     200: "¡Producto agregado!",
     201: "¡Producto actualizado!",
 };

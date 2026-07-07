@@ -8,7 +8,7 @@
                         <div class="d-flex justify-content-end pb-2">
                             <button type="button" class="btn-close" @click="modalClose()" aria-label="Close"></button>
                         </div>
-                        <div class="row">
+                        <div class="row" v-if="!pedidoExitoso">
                             <h2 class="text-center" id="pedido_success">
                                 ¡Casí listo!
                             </h2>
@@ -16,11 +16,14 @@
                                 <div class="card h-100 shadow-sm cardinfo">
                                     <div class="card-body">
                                         <div class="mt-3">
-                                            <h4 class="text-center">Ticket</h4>
+                                            <h4 class="text-center"><b>Ticket</b></h4>
                                             <ul class="list-group list-group-flush">
                                                 <li class="list-group-item d-flex" style="border-radius: 15px;">
                                                     <small class="mx-auto" style="white-space: pre-wrap;">{{ props.ticket }}</small>
                                                 </li>
+                                            </ul>
+                                            <ul class="list-group list-group-flush">
+                                                <span id="nota_pedido"><b>Nota:</b> El envío es gratis en pedidos mayores a $700.</span>
                                             </ul>
                                         </div>
                                     </div>
@@ -91,6 +94,74 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row" v-else>
+                            <h2 class="text-center" id="pedido_success">
+                                ¡Pedido realizado con exito!
+                            </h2>
+                            <div class="col-sm-6">
+                                <div class="card h-100 shadow-sm cardinfo">
+                                    <div class="card-body d-flex flex-column" style="overflow-y: auto;">
+                                        <div class="mt-4">
+                                            <h4 class="text-center"><b>¿No pudiste enviar el ticket en el paso anterior?</b></h4>
+                                            <h6 class="text-start pt-2"><b>Sigue los siguientes pasos</b></h6>
+                                            <ul class="list-group list-group-flush" style="border-radius: 15px;">
+                                                <li class="list-group-item">
+                                                    <div class="row">
+                                                        <div class="d-flex justify-content-center">
+                                                            <ol class="list-group list-group-numbered">
+                                                                <li class="list-group-item" style="border-radius: 15px;">
+                                                                    <small>
+                                                                        Revisa que el ticket esté en tu portapeletes, o vuelve a copiarlo en la sección de <b>Ticket</b>.
+                                                                    </small>
+                                                                </li>
+                                                                <li class="list-group-item mt-2" style="border-radius: 15px;">
+                                                                    <small>
+                                                                        Ve a la página oficial de Black Button en Facebook, inicia un chat con la vendedora,
+                                                                        pega y envía el ticket que ya copiaste anteriormente.
+                                                                    </small>
+                                                                    <div class="m-2 d-flex justify-content-center">
+                                                                        <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="form-check-label" for="inlineRadio2" id="btn_pedido_face">
+                                                                            <span class="me-2">BlackButton</span>
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                                                                                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                                                                            </svg>
+                                                                        </a>
+                                                                    </div>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="card h-100 shadow-sm cardinfo">
+                                    <div class="card-body">
+                                        <div class="mt-3">
+                                            <h4 class="text-center"><b>Ticket</b></h4>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex" style="border-radius: 15px;">
+                                                    <small class="mx-auto" style="white-space: pre-wrap;">{{ props.ticket }}</small>
+                                                </li>
+                                                <button id="btn_envio"
+                                                    class="mt-2"
+                                                    :class="[copiado == true ? 'btn btn-success' : 'btn_action']"
+                                                    @click="copiarAlPortapapeles(true)">
+                                                    <span v-if="!copiado">Copiar ticket <i class="bi bi-clipboard"></i></span>
+                                                    <span v-else>Ticket copiado <i class="bi bi-clipboard-check"></i></span>
+                                                </button>
+                                            </ul>
+                                            <ul class="list-group list-group-flush">
+                                                <span id="nota_pedido"><b>Nota:</b> El envío es gratis en pedidos mayores a $700.</span>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,7 +176,7 @@
     import { agregarPedido } from '@/services/catalogo-services';
     import alertas from '@/assets/js/notifications';
     const cartStore = useCartStore();
-    const accionadoCopiado = ref(false);
+    const pedidoExitoso = ref(false);
     // Define emits
     const emit = defineEmits(['cerrar-modal']);
     const props = defineProps({
@@ -124,15 +195,22 @@
     });
 
     function modalClose() {
-        // cerrarmodal();
-        emit('cerrar-modal');
+        if (pedidoExitoso.value) {
+            location.reload();
+        } else {
+            // cerrarmodal();
+            emit('cerrar-modal');
+        }
     }
     // Estado para cambiar el texto del botón temporalmente
     const copiado = ref(false);
-    const copiarAlPortapapeles = async () => {
+    const copiarAlPortapapeles = async (forBtn = false) => {
         try {
-            console.log('entra');
             await navigator.clipboard.writeText(props.ticket);
+            if (forBtn) {
+                copiado.value = true;
+                setTimeout(() => copiado.value = false, 1500);
+            }
         } catch (err) {
             console.error('Error al copiar el texto: ', err);
         }
@@ -170,16 +248,20 @@
                     // nuevaVentana.location.href = "https://www.facebook.com/share/1CS1VTt2wB/";
                     nuevaVentana.location.href = "https://m.me/BlackButtonn";
                 }
+                // Detenemos el temporizador que pueda haber
                 $('#temp_offcanvas').fadeOut();
                 $('#temporizador').fadeOut();
                 cartStore.detenerTemporizador(false, true);
                 cartStore.recargaCatalogo();
-                setTimeout(() => location.reload(), 1000);
+                // Marcamos el pedido como correcto
+                pedidoExitoso.value = true;
+                // setTimeout(() => location.reload(), 1000);
             }
         } catch (err) {
             console.error("Error en la petición: ", err);
         }
     };
+    // Función para dar aviso de un pedido completo y mantener el ticket activo hasta carga
 </script>
 
 <style scoped>
@@ -259,7 +341,7 @@
         border: 1px solid #B53471;
         color: #B53471;
         border-radius: 5px;
-        padding: 3px;
+        padding: 6.7px;
         font-size: 15px;
         background-color: transparent;
     }
@@ -267,6 +349,16 @@
     .btn_action:hover {
         background-color: #B53471;
         color: white;
+    }
+
+    #nota_pedido {
+        opacity: 0.8;
+        margin-top: 1rem;
+    }
+
+    .btn-close {
+        background-color: red;
+        border-radius: 100%;
     }
 
     @media (max-width: 380px) {

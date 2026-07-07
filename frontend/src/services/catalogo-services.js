@@ -116,13 +116,6 @@ export function agregarPedido(params, codigo_temp, pedido) {
             'codigo_temp': codigo_temp,
             'pedido': pedido
         }),
-        // body: JSON.stringify({
-        //     'id': params.id,
-        //     'cantidad': params.quantity,
-        //     'tipo_entrega': params.tipo_entrega,
-        //     'codigo_temp': codigo_temp,
-        //     'pedido': params.pedido
-        // }),
         headers: {
             'Content-Type': 'application/json'
         }

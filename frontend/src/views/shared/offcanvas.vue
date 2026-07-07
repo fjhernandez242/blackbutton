@@ -9,11 +9,11 @@
             <div class="btn-group" role="group">
                 <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS"
                     aria-expanded="false" aria-controls="collapseS">
-                    ¿Qué es Sobre pedido?
+                    ¿Sobre pedido?
                 </button>
                 <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseE"
                     aria-expanded="false" aria-controls="collapseE">
-                    ¿Qué es Entrega inmediata?
+                    ¿Entrega inmediata?
                 </button>
             </div>
             <div class="collapse" id="collapseS">
@@ -25,7 +25,7 @@
             <div class="collapse" id="collapseE">
                 <div class="card card-body">
                     <h6><b>Entrega inmediata:</b></h6>
-                    Son Amigurumi que ya estan tejidos y listos para ser enviados.
+                    Son Amigurumis que ya están tejidos y listos para ser enviados.
                 </div>
             </div>
         </div>
@@ -83,6 +83,7 @@
                                     </li>
                                 </ul>
                             </div>
+                            <small class="msgLimite" :id="`limite_${producto.id}`">Se alcanzó el límite permitido.</small>
                         </div>
                     </div>
                     <div class="card-footer badge text-dark" style="font-size: 13px;"
@@ -130,7 +131,7 @@
     import { useCartStore } from '@/store/cartStore.js';
     import { API_BASE_URL } from '@/config/api-urls';
     import alertas from '@/assets/js/notifications';
-    import { setterProducto, generaCodigoVenta } from '@/services/catalogo-services';
+    import { setterProducto, generaCodigoVenta, productoById, apartarProducto } from '@/services/catalogo-services';
     import { sendMessage } from '@/services/email-services';
     import modalPedido from '../modal/modalPedido.vue';
     const mostrarModal = ref(false);
@@ -217,7 +218,51 @@
     }
 
     // Función para aumentar la cantidad de productos
-    const addTopCart = (params) => {
+    function cambioMsgLimite(idLimite) {
+        $(`#limite_${idLimite}`).show();
+        setTimeout(() => $(`#limite_${idLimite}`).hide(), 2500);
+    }
+    async function addTopCart(params) {
+        if (params.tipo_entrega == 1) {
+            // Valida que exista el producto
+            const busca_producto = await productoById(params.id);
+            if (busca_producto.error) {
+                console.log('No se encontró el producto');
+                alertas.alertError(busca_producto.error);
+                return;
+            }
+            // Retorna si el producto es de tipo sobre pedido o si ya no hay stock disponible
+            if (busca_producto.producto.tipo_entrega == 2 || busca_producto.producto.inventario <= 0) {
+                cambioMsgLimite(params.id);
+                return;
+            }
+            // Actualiza el producto en el catálogo
+            const response = await setterProducto({
+                "id": params.id,
+                "cantidad": 1
+            });
+            if (response.error) {
+                alertas.alertError(response.error);
+                return;
+            }
+            // Si ya existe un codigo de temporal para el usuario se agrega
+            let param_apartado = {
+                "id_prod": params.id,
+                "cantidad": 1,
+                "codigo_temp": ""
+            }
+            if (cartStore.expiracion.id_temp != '') {
+                param_apartado.codigo_temp = cartStore.expiracion.id_temp || null;
+            }
+            // Aumenta la cantidad de apartado para que se refleje en el catálogo
+            const apartado = await apartarProducto(param_apartado);
+            if (apartado.error) {
+                alertas.alertError(response.error);
+            }
+            // Recarga el catálogo
+            emit('carga_lista');
+        }
+        // Aumenta la cantidad del producto en el carrito
         const producto = {
             'id': params.id,
             'producto': params.producto,
@@ -225,26 +270,10 @@
             'dimensiones': params.dimensiones,
             'tipo_entrega': params.tipo_entrega
         }
-        cartStore.addItem(producto, 1);
-        if (params.tipo_entrega == 1) {
-
-            console.log(cartStore.items);
-
+        const response = cartStore.addItem(producto, 1);
+        if (response =='limite') {
+            cambioMsgLimite(params.id);
         }
-        // ID del temporizador
-        // const idSearch = tipo_entrega == 2 ? 'cantProdPed_' : 'cantProd_';
-        // const cantidad = $('#'+ idSearch + id).val();
-        // if (tipo_entrega == 1) {
-        //     $('#'+ idSearch + id).val('1');
-        //     if (!cartStore.expiracion.id_temp) {
-        //         infoTiempo();
-        //     }
-        //     ctrlInventario(params, cantidad);
-        // } else {
-        //     $('#'+ idSearch + params.id).val('1');
-        // }
-        // cartStore.addItem(params, cantidad);
-        // $('.overlay-spinner').hide();
     };
 </script>
 
@@ -390,4 +419,17 @@
         border-radius: 5px;
         font-weight: bold;
     }
+
+    .msgLimite {
+        font-weight: bold;
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
+        text-align: center;
+        display: none;
+    }
+
+    .btn-close {
+        background-color: red;
+        border-radius: 100%;
+    }
+
 </style>

@@ -278,6 +278,7 @@
 <style scoped>
     .container {
         padding: 1rem;
+        padding-top: 3rem;
         padding-inline: 4rem;
         background-color: rgba(238, 247, 255, 0.705);
     }
@@ -407,7 +408,7 @@
     }
 
     .styleEntrega {
-        background-color: #528ad4;
+        background-color: #b53470e1;
     }
 
     .styleEntrega .collapse {
@@ -415,7 +416,7 @@
     }
 
     .styleEntrega .card span {
-        text-shadow: 0 7px 15px rgb(19, 104, 214);
+        text-shadow: 0 7px 15px rgb(181, 52, 113);
     }
 
     /** media */
@@ -441,6 +442,11 @@
         #msgTempExp {
             left: 20rem;
         }
+
+        .container {
+            padding: 2rem;
+        }
+
     }
 
     @media (min-width: 481px) and (max-width: 800px) {
@@ -457,6 +463,7 @@
         }
 
         .container {
+            padding-top: 1rem;
             padding-inline: 0.5rem;
         }
 

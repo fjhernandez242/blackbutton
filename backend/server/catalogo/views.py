@@ -134,7 +134,10 @@ def getPedidoByClave(request):
         get_pedido = pedidos_model.objects.filter(codigo_venta=data['dato'])
     elif data.get('tipo') == 'fecha':
         if not data.get('filtro'):
-            get_pedido = pedidos_model.objects.filter(fecha_venta=data['dato'])
+            if not data.get('dato')['fini']:
+                get_pedido = pedidos_model.objects.filter(fecha_venta=data['dato'])
+            else:
+                get_pedido = pedidos_model.objects.filter(fecha_venta__range=(data.get('dato')['fini'], data.get('dato')['ffin']))
         elif data.get('filtro'):
             hoy = timezone.localdate()
             anio = hoy.year

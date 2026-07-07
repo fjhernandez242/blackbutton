@@ -5,6 +5,21 @@
         <nav class="navbar navbar-expand-lg flex-grow-1">
             <div class="container-fluid">
                 <h3 id="titleNavbar">BlackButton</h3>
+                <div id="carritoMovil">
+                    <button type="button" class="nav-link btn position-relative text-center" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
+                        <i class="bi bi-cart2"></i>
+                        <span v-if="cartStore.totalItemsCount > 0"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ cartStore.totalItemsCount }}
+                        </span>
+                    </button>
+                    <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex ps-4 pb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                            <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                        </svg>
+                    </a>
+                </div>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -23,24 +38,26 @@
                             <a class="nav-link" aria-current="page" @click="cambiarTipo(2)"
                                 :class="[cartStore.tipoEntrega['cambioTipo'] == 2 ? 'hoverLink' : '']">Sobre pedido</a>
                         </li>
-                        <li class="nav-item pe-4 ps-1">
-                            <button type="button" class="nav-link btn position-relative" data-bs-toggle="offcanvas"
-                                data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
-                                <i class="bi bi-cart2"></i>
-                                <span v-if="cartStore.totalItemsCount > 0"
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ cartStore.totalItemsCount }}
-                                <span class="visually-hidden">Productos en carrito</span>
-                                </span>
-                            </button>
-                        </li>
-                        <li class="nav-item pe-3">
-                            <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-                                    <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
-                                </svg>
-                            </a>
-                        </li>
+                        <div id="carritoWeb">
+                            <li class="nav-item pe-4 ps-1">
+                                <button type="button" class="nav-link btn position-relative" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
+                                    <i class="bi bi-cart2"></i>
+                                    <span v-if="cartStore.totalItemsCount > 0"
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ cartStore.totalItemsCount }}
+                                    <span class="visually-hidden">Productos en carrito</span>
+                                    </span>
+                                </button>
+                            </li>
+                            <li class="nav-item pe-3">
+                                <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                                        <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                                    </svg>
+                                </a>
+                            </li>
+                        </div>
                     </ul>
                     <form class="d-flex" id="form_search">
                         <!--input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"-->
@@ -99,6 +116,13 @@
 </script>
 
 <style scoped>
+    #carritoMovil {
+        visibility: hidden;
+    }
+
+    #carritoWeb {
+        display: flex;
+    }
 
     @media (max-width: 991.98px) {
     /* 1. Quitamos el comportamiento fijo en móvil para que pueda empujar el contenido */
@@ -122,6 +146,15 @@
         #form_search {
             margin-top: 15px;
             width: 100%;
+        }
+
+        #carritoMovil {
+            visibility: visible;
+            display: flex;
+        }
+
+        #carritoWeb {
+            display: none;
         }
     }
 

@@ -95,11 +95,12 @@
                                     <p>Ó</p>
                                 </div>
                                 <div class="col-md-6 col-12">
-                                    <label for="fech_busqueda" class="form-label">Fecha de pedido</label>
+                                    <label for="fech_busqueda" class="form-label">Rango de fechas (incial y final)</label>
                                     <div class="input-group mb-3">
-                                        <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
                                         <input type="date" class="form-control limpiarCampo" name="fech_busqueda" id="fech_busqueda"
                                             v-model="v_fech_busqueda" placeholder="Fecha de pedido">
+                                        <input type="date" class="form-control limpiarCampo ms-1" name="fech_busqueda" id="fech_busqueda"
+                                            v-model="v_fech_busqueda_fin" placeholder="Fecha de pedido">
                                     </div>
                                 </div>
                                 <div class="row d-flex justify-content-center align-items-center">
@@ -116,7 +117,7 @@
                             <table class="table-responsive">
                                 <thead>
                                     <tr>
-                                        <th colspan="3" class="text-center">Filtros de busqueda</th>
+                                        <th colspan="3" class="text-center">Filtros rápidos de búsqueda</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -374,6 +375,7 @@
     // Variable busqueda
     const v_cve_busqueda = ref('');
     const v_fech_busqueda = ref('');
+    const v_fech_busqueda_fin = ref('');
     // Variables formularios
     const v_producto = ref('');
     const v_precio = ref(0);
@@ -409,12 +411,12 @@
 
         let paramsSearch = '';
         let refBusqueda = 'cve';
-        if (v_cve_busqueda.value !== '' && v_fech_busqueda.value !== '') {
+        if (v_cve_busqueda.value !== '' && (v_fech_busqueda.value !== '' || v_fech_busqueda_fin.value !== '')) {
             paramsSearch = v_cve_busqueda.value;
-        } else if (v_cve_busqueda.value === '' && v_fech_busqueda.value !== '') {
-            paramsSearch = v_fech_busqueda.value;
+        } else if (v_cve_busqueda.value === '' && (v_fech_busqueda.value !== '' && v_fech_busqueda_fin.value !== '')) {
+            paramsSearch = { 'fini': v_fech_busqueda.value, 'ffin': v_fech_busqueda_fin.value };
             refBusqueda = 'fecha';
-        } else if (v_cve_busqueda.value !== '' && v_fech_busqueda.value === '') {
+        } else if (v_cve_busqueda.value !== '' && (v_fech_busqueda.value === '' && v_fech_busqueda_fin.value === '')) {
             paramsSearch = v_cve_busqueda.value;
         }
         if (paramsSearch == '') {
@@ -520,7 +522,7 @@
             $('.overlay-spinner').hide();
             localStorage.removeItem('admin_token');
             localStorage.removeItem('admin_token_expires');
-            // localStorage.removeItem('admin_user');
+            localStorage.removeItem('admin_user');
 
             router.push('login_panel');
         }
@@ -648,6 +650,7 @@
         } else if (section == 'tabla') {
             v_cve_busqueda.value = '';
             v_fech_busqueda.value = '';
+            v_fech_busqueda_fin.value = '';
             prod_reastreado.value = [];
             sumaProdCantidad.value = {
                 totalCosto: 0,
@@ -905,6 +908,10 @@
         #icon-top {
             left: 18rem !important;
         }
+
+        .container {
+            padding-inline: 0.5rem;
+        }
     }
 
     @media (min-width: 430px) and (max-width: 500px) {
@@ -916,6 +923,16 @@
 
         #filtroIndicadores {
             max-width: 100%;
+        }
+
+        .container {
+            padding-inline: 0.5rem;
+        }
+    }
+
+    @media (min-width: 381px) and (max-width: 429px) {
+        .container {
+            padding-inline: 0.5rem;
         }
     }
 

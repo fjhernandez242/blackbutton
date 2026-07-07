@@ -45,13 +45,14 @@ export const useCartStore = defineStore('cart', {
 
             const notify = useNotificationStore();
             const existingItem = this.items.find(item => item.id === product.id && item.tipo_entrega === product.tipo_entrega);
-
             if (existingItem) {
                 // Si el producto ya existe, solo aumentamos la cantidad
                 const suma = parseInt(existingItem.quantity) + parseInt(cantidad);
                 // Mantiene un tope de 5 poductos por pedido
-                if (suma <= 5) {
+                if (suma <= 5 || product.tipo_entrega == 1) {
                     existingItem.quantity = suma;
+                } else {
+                    return 'limite';
                 }
 
 

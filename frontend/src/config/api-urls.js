@@ -34,7 +34,7 @@ export const URLS = {
     // Url para obtener expiracion
     OBTENER_EXPIRACION: `${API_BASE_URL}/catalogo/obtenerExpiracion`,
     // Url para obtener un pedido por medio de su clave
-    OBTENER_PEDIDO: `${API_BASE_URL}/catalogo/obtenerPedidco`,
+    OBTENER_PEDIDO: `${API_BASE_URL}/catalogo/obtenerPedido`,
     // Url para completar la venta
     ESTADO_VENTA: `${API_BASE_URL}/catalogo/cambioEstadoVenta`,
     // Url para obtener el calculo de ventas

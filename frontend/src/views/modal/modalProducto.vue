@@ -246,4 +246,9 @@
     #btnCerrar:hover {
         background-color: #c56cf0;
     }
+
+    .btn-close {
+        background-color: red;
+        border-radius: 100%;
+    }
 </style>

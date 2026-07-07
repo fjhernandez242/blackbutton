@@ -11,7 +11,7 @@ urlpatterns = [
     re_path('setterProducto', views.setterProducto),
     re_path('apartarProducto', views.apartados),
     re_path('obtenerExpiracion', views.obtener_expiracion),
-    re_path('obtenerPedidco', views.getPedidoByClave),
+    re_path('obtenerPedido', views.getPedidoByClave),
     re_path('cambioEstadoVenta', views.cambioEstadoVenta),
     re_path('calculoMovimientos', views.calculoMovimientos),
     re_path('generaCodigoVenta', views.codigo_venta),
