@@ -729,9 +729,7 @@
                     (response) => {
                         if (response.error) {
                             alertas.alertError(response.error);
-                            enviando.value = true;
                         } else {
-                            enviando.value = false;
                             limpiarCampo('add');
                             elementoActEdit.value = false;
                             obtieneProductos();
@@ -745,9 +743,7 @@
                     (response) => {
                         if (response.error) {
                             alertas.alertError(response.error);
-                            enviando.value = true;
                         } else {
-                            enviando.value = false;
                             limpiarCampo('add');
                             alertas.alertSuccess(getErrorMessages(200));
                         }
@@ -755,6 +751,7 @@
                 );
             }
         }
+        enviando.value = false;
         $('.overlay-spinner').hide();
     }
 

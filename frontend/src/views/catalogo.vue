@@ -366,7 +366,7 @@
         right: 0;
         top: 8.5rem;
         margin: 1rem;
-        z-index: 1;
+        z-index: 100;
         box-shadow: 0 7px 25px rgb(181, 52, 113);
     }
 
@@ -380,14 +380,13 @@
     #msgTempExp {
         display: none;
         position: fixed;
-        background-color: rgb(238, 247, 255);
         padding: 1.5rem;
         border-radius: 50px 0 80px 20px;
         right: 7rem;
         left: 68rem;
         box-shadow: 0 7px 15px rgb(181, 52, 113);
         top: 11rem;
-        transition: all 0.7ms;
+        transition: all 0.7s;
         background-color: white;
     }
 

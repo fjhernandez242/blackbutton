@@ -1,7 +1,7 @@
 <template>
     <Transition name="fade-slide">
         <div v-if="props.visible" class="modal" id="trabajoModal" tabindex="-1" aria-labelledby="trabajoModalLabel"
-            style="display: block;" aria-modal="true" role="dialog">
+            style="display: block;" aria-modal="true" role="dialog" ref="contenedorModal">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content h-50">
                     <div class="modal-body">
@@ -177,6 +177,7 @@
     import alertas from '@/assets/js/notifications';
     const cartStore = useCartStore();
     const pedidoExitoso = ref(false);
+    const contenedorModal = ref(false);
     // Define emits
     const emit = defineEmits(['cerrar-modal']);
     const props = defineProps({
@@ -255,6 +256,8 @@
                 cartStore.recargaCatalogo();
                 // Marcamos el pedido como correcto
                 pedidoExitoso.value = true;
+                // Realiza un scroll hasta la parte superior de la pantalla
+                contenedorModal.value.scrollTo({ top: 0, behavior: 'smooth' });
                 // setTimeout(() => location.reload(), 1000);
             }
         } catch (err) {

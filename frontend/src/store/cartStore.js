@@ -52,6 +52,7 @@ export const useCartStore = defineStore('cart', {
                 if (suma <= 5 || product.tipo_entrega == 1) {
                     existingItem.quantity = suma;
                 } else {
+                    notify.lanzarAlerta(`Se alcanzó el límite de Amigurumis por pedido`);
                     return 'limite';
                 }
 
