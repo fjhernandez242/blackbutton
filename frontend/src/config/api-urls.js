@@ -1,6 +1,6 @@
 // Url base
-// export const API_BASE_URL = 'https://blackbuttonbackend.fjdev.icu/api';
-export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = import.meta.env.VITE_URL_API;
+// export const API_BASE_URL = 'http://localhost:8000';
 // Urls endpoint
 export const URLS = {
     // Url para inicio de sesion

@@ -23,7 +23,7 @@
                                                 </li>
                                             </ul>
                                             <ul class="list-group list-group-flush">
-                                                <span id="nota_pedido"><b>Nota:</b> El envío es gratis en pedidos mayores a $700.</span>
+                                                <span id="nota_pedido"><b>Nota:</b> En pedidos mayores a $700 el envío es gratis.</span>
                                             </ul>
                                         </div>
                                     </div>
@@ -33,19 +33,10 @@
                                 <div class="card h-100 shadow-sm cardinfo">
                                     <div class="card-body d-flex flex-column" style="overflow-y: auto;">
                                         <div class="mt-4">
-                                            <h4 class="text-center"><b>¿Cómo finalizo mi pedido?</b></h4>
-                                            <h6 class="text-start pt-2"><b>Selecciona la forma de envio</b></h6>
+                                            <h4 class="text-center"><b>¡Queremos preparar tu pedido!</b></h4>
+                                            <h6 class="text-start pt-2"><b>Elige cómo prefieres enviarnos los detalles de tu compra:</b></h6>
                                             <ul class="list-group list-group-flush" style="border-radius: 15px;">
                                                 <li class="list-group-item">
-                                                    <p><b>Opción 1</b></p>
-                                                    <div class="row">
-                                                        <div class="d-flex align-items-center">
-                                                            <small>
-                                                                Te redirigiremos a WhatsApp con tu mensaje listo. Por seguridad, también copiamos
-                                                                el ticket a tu portapapeles por si necesitas pegarlo manualmente.
-                                                            </small>
-                                                        </div>
-                                                    </div>
                                                     <div class="row m-2">
                                                         <div class="form-check form-check-inline">
                                                             <input class="form-check-input" type="radio" name="inlineRadioOptions"
@@ -58,17 +49,15 @@
                                                             </label>
                                                         </div>
                                                     </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <p><b>Opción 2</b></p>
                                                     <div class="row">
-                                                        <div class="d-flex justify-content-center">
+                                                        <div class="d-flex align-items-center">
                                                             <small>
-                                                                Copiamos el ticket a tu portapapeles. Te redirigiremos a la página oficial de BlackButton,
-                                                                para que puedas simplemente iniciar un chat, pegar y enviar tu pedido.
+                                                                Te redirigiremos con tu mensaje listo para que solo presiones "enviar".
                                                             </small>
                                                         </div>
                                                     </div>
+                                                </li>
+                                                <li class="list-group-item">
                                                     <div class="row m-2">
                                                         <div class="form-check form-check-inline">
                                                             <input class="form-check-input" type="radio" name="inlineRadioOptions"
@@ -81,13 +70,24 @@
                                                             </label>
                                                         </div>
                                                     </div>
+                                                    <div class="row">
+                                                        <div class="d-flex justify-content-center">
+                                                            <small>
+                                                                Te redirigiremos a nuestra página.
+                                                                Ahí deberás abrir el chat para pegar y enviarnos tu ticket.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item text-center">
+                                                    <small><b>Al enviar tu pedido, tu ticket se copiará automáticamente al portapapeles.</b></small>
                                                 </li>
                                                 <span class="text-center pt-2"
                                                     style="color: red;"
                                                     v-if="!envioseleccionado">Selecciona una opción de envio</span>
                                                 <button id="btn_envio"
                                                 class="btn_action mt-2"
-                                                @click="enviarPedido()">Enviar pedido</button>
+                                                @click="enviarPedido()">Enviar pedido <i class="bi bi-send-arrow-up-fill"></i></button>
                                             </ul>
                                         </div>
                                     </div>
@@ -115,27 +115,26 @@
                                                                     </small>
                                                                 </li>
                                                                 <li class="list-group-item mt-2" style="border-radius: 15px;">
+                                                                    <!-- <small>
+                                                                        Puedes usar el botón de abajo para que te redirijamos o
+                                                                        buscar manualmente nuestra página oficial como <b>Black Button</b> en Facebook.
+                                                                        Al entrar abré un chat, mantén presionado para pegar y enviar tu ticket copiado.
+                                                                    </small> -->
                                                                     <small>
-                                                                        Ve a la página oficial de BlackButton en Facebook, inicia un chat, pega y
-                                                                        envía el ticket que ya copiaste anteriormente.
+                                                                        Envia el ticket desde el chat de la página oficial en Facebook. Puedes usar la opción de abajo para
+                                                                        que te redirijamos o buscar manualmente nuestra página como <br> <b>Black Button</b>.
                                                                     </small>
+                                                                    <div class="m-2 d-flex justify-content-center">
+                                                                        <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="form-check-label" for="inlineRadio2" id="btn_pedido_face">
+                                                                            <span class="me-2">BlackButton</span>
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                                                                                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                                                                            </svg>
+                                                                        </a>
+                                                                    </div>
                                                                 </li>
                                                             </ol>
                                                         </div>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <small>
-                                                        <b>Nota:</b> También puedes dar clic en la opción de abajo para que se te redirija a la página
-                                                        oficial.
-                                                    </small>
-                                                    <div class="m-2 d-flex justify-content-center">
-                                                        <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="form-check-label" for="inlineRadio2" id="btn_pedido_face">
-                                                            <span class="me-2">BlackButton</span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-                                                                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
-                                                            </svg>
-                                                        </a>
                                                     </div>
                                                 </li>
                                             </ul>
@@ -161,7 +160,7 @@
                                                 </button>
                                             </ul>
                                             <ul class="list-group list-group-flush">
-                                                <span id="nota_pedido"><b>Nota:</b> El envío es gratis en pedidos mayores a $700.</span>
+                                                <span id="nota_pedido"><b>Nota:</b> En pedidos mayores a $700 el envío es gratis.</span>
                                             </ul>
                                         </div>
                                     </div>

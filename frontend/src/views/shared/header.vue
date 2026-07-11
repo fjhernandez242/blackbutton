@@ -5,7 +5,7 @@
         <nav class="navbar navbar-expand-lg flex-grow-1">
             <div class="container-fluid">
                 <h3 id="titleNavbar">BlackButton</h3>
-                <div id="carritoMovil">
+                <div class="carritoMovil">
                     <button type="button" class="nav-link btn position-relative text-center" data-bs-toggle="offcanvas"
                         data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
                         <i class="bi bi-cart2"></i>
@@ -14,11 +14,20 @@
                             {{ cartStore.totalItemsCount }}
                         </span>
                     </button>
-                    <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex ps-4 pb-2">
+                    <a href="https://www.facebook.com/share/1CS1VTt2wB/" target="_blank" class="d-flex ps-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
                             <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
                         </svg>
                     </a>
+                </div>
+                <div class="carritoMovilSearch">
+                    <form id="form_search" class="pb-2 ms-3">
+                        <!--input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"-->
+                        <div class="form-floating me-2">
+                            <input type="text" class="form-control" id="floatingInput" placeholder="" v-model="v_search">
+                            <label for="floatingInput">Buscar...</label>
+                        </div>
+                    </form>
                 </div>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +47,7 @@
                             <a class="nav-link" aria-current="page" @click="cambiarTipo(2)"
                                 :class="[cartStore.tipoEntrega['cambioTipo'] == 2 ? 'hoverLink' : '']">Sobre pedido</a>
                         </li>
-                        <div id="carritoWeb">
+                        <div class="carritoWeb">
                             <li class="nav-item pe-4 ps-1">
                                 <button type="button" class="nav-link btn position-relative" data-bs-toggle="offcanvas"
                                     data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" @click="loadedProducts">
@@ -59,13 +68,15 @@
                             </li>
                         </div>
                     </ul>
-                    <form class="d-flex" id="form_search">
-                        <!--input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"-->
-                        <div class="form-floating me-2">
-                            <input type="text" class="form-control" id="floatingInput" placeholder="" v-model="v_search">
-                            <label for="floatingInput">Buscar...</label>
-                        </div>
-                    </form>
+                    <div class="carritoWebSearch">
+                        <form class="d-flex" id="form_search">
+                            <!--input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"-->
+                            <div class="form-floating me-2">
+                                <input type="text" class="form-control" id="floatingInput" placeholder="" v-model="v_search">
+                                <label for="floatingInput">Buscar...</label>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -116,11 +127,19 @@
 </script>
 
 <style scoped>
-    #carritoMovil {
+    .carritoMovil {
         visibility: hidden;
     }
 
-    #carritoWeb {
+    .carritoMovilSearch {
+        visibility: hidden;
+    }
+
+    .carritoWeb {
+        display: flex;
+    }
+
+    .carritoWebSearch {
         display: flex;
     }
 
@@ -141,20 +160,53 @@
             padding-top: 15px;
             padding-bottom: 15px;
         }
+    }
 
-        /* Optativo: Asegura que el buscador no quede pegado al final del menú */
-        #form_search {
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        #carritoMovil {
+    @media (max-width: 991.98px) and (min-width: 570px) {
+         /* Optativo: Asegura que el buscador no quede pegado al final del menú */
+        .carritoMovilSearch {
             visibility: visible;
-            display: flex;
         }
 
-        #carritoWeb {
+        .carritoMovil {
+            visibility: visible;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carritoWeb {
             display: none;
+        }
+
+        .carritoWebSearch {
+            display: none;
+        }
+    }
+
+    @media (max-width: 570px) {
+        .carritoMovil {
+            visibility: visible;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carritoMovilSearch {
+            display: none;
+        }
+
+        .carritoWeb {
+            display: none;
+        }
+
+
+        .carritoWebSearch {
+            visibility: visible;
         }
     }
 

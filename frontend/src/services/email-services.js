@@ -45,8 +45,7 @@ export const sendMessage = (code, imprimir = false, reimpresion = false) => {
             `*Código de pedido*: ${code}\n` +
             `*Subtotal*: ${subtotalFormateado}\n` +
             `*Envió*: $${envio}\n` +
-            `*Total*: ${totalFormateado}\n\n` +
-            `_Enviado desde BlackButton web_`;
+            `*Total*: ${totalFormateado}\n\n`;
     } else {
         mensaje = code;
     }

@@ -4,9 +4,6 @@
             <div class="card shadow-lg p-4">
                 <div class="card-header border-0 text-center">
                     <h3>Panel de adminstración</h3>
-                    <!--div id="img_bienvenida">
-                        <img src="/src/assets/img/crocket.png" alt="">
-                    </div-->
                 </div>
                 <div class="card-body">
                     <form @submit.prevent="login" novalidate id="form_login">
@@ -20,7 +17,7 @@
                                 v-model="v_pass">
                             <label for="floatingPassword">Contraseña</label>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-auto m-2 text-center">
                             <span id="passwordForgot" class="form-text mt-2" @click="recuperarContrasena()">
                             Olvide mi contraseña
                             </span>
@@ -33,7 +30,14 @@
                                 {{ msg_error }}
                             </small>
                         </div>
-                        <button type="submit" class="btn mt-2">Entrar</button>
+                        <div class="row d-flex">
+                            <div class="col-6 text-start">
+                                <button type="submit" class="btn mt-2">Entrar <i class="bi bi-box-arrow-in-right"></i></button>
+                            </div>
+                            <div class="col-6 text-end">
+                                <button type="button" class="btn mt-2" @click="irCatalogo()">Ir al catálogo <i class="bi bi-journal-text"></i></button>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -137,6 +141,10 @@
         $('#floatingPassword').removeClass('campoVacio');
         $('#floatingInput').removeClass('campoVacio');
     });
+    // Función para reedigir al catalogo
+    function irCatalogo() {
+        router.push('/');
+    }
 </script>
 
 <style scoped>
@@ -169,6 +177,7 @@
     #passwordForgot {
         cursor: pointer;
         margin-top: 10rem !important;
+        text-decoration: underline;
     }
 
     #passwordForgot:hover {

@@ -4,7 +4,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 d-flex justify-content-end">
-                    <button class="btn btn-sm" @click="logout()">Cerrar Sesión</button>
+                    <button class="btn btn-sm" @click="irCatalogo()">Ir al catálogo <i class="bi bi-journal-text"></i></button>
+                    <button class="btn btn-sm ms-2" @click="logout()">Cerrar Sesión <i class="bi bi-door-open"></i></button>
                 </div>
             </div>
             <div class="row w-50 text-start d-flex align-items-center" id="filtroIndicadores">
@@ -499,6 +500,10 @@
         });
     };// Llama los archivos al iniciar la página
 
+    // Función para reedigir al catalogo
+    function irCatalogo() {
+        router.push('/');
+    }
     // Función para el cerrado de sesion
     async function logout() {
         const params = {
@@ -769,6 +774,7 @@
 
     .btn:hover {
         background-color: #c56cf0;
+        color: rgba(255, 255, 255, 0.534);
     }
 
     .container {
